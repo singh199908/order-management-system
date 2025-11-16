@@ -202,6 +202,16 @@ def send_whatsapp_notification(order_id, ba_username, total_amount, item_count, 
 # Users can download Excel files from the admin dashboard instead
 
 # Routes
+@app.route('/health')
+@app.route('/ping')
+def health_check():
+    """Health check endpoint for keepalive services"""
+    return jsonify({
+        'status': 'ok',
+        'message': 'Server is running',
+        'timestamp': datetime.utcnow().isoformat()
+    }), 200
+
 @app.route('/')
 def index():
     if 'user_id' in session:
