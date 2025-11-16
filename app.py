@@ -135,17 +135,27 @@ def send_whatsapp_notification(order_id, ba_username, total_amount, item_count, 
         if not to_number:
             to_number = app.config['ADMIN_WHATSAPP_NUMBER']
         
+        # Validate Account SID format (should start with "AC")
+        if account_sid and not account_sid.startswith('AC'):
+            error_msg = f'[ERROR] Invalid Twilio Account SID format. Account SID should start with "AC". Current value starts with: {account_sid[:2] if len(account_sid) >= 2 else "empty"}'
+            app.logger.error(error_msg)
+            print(error_msg)
+            return False
+        
         # Check if WhatsApp is configured
-        if not account_sid or not auth_token or not to_number or not content_sid:
+        if not account_sid or not auth_token or not to_number:
             missing = []
             if not account_sid: missing.append('TWILIO_ACCOUNT_SID')
             if not auth_token: missing.append('TWILIO_AUTH_TOKEN')
             if not to_number: missing.append('ADMIN_WHATSAPP_NUMBER')
-            if not content_sid: missing.append('TWILIO_CONTENT_SID')
             error_msg = f'WhatsApp not configured. Missing: {", ".join(missing)}'
             app.logger.warning(error_msg)
             print(f"[WARNING] {error_msg}")  # Also print to console
             return False
+        
+        # Log credential info for debugging (masked)
+        masked_sid = f"{account_sid[:4]}...{account_sid[-4:]}" if len(account_sid) > 8 else "***"
+        app.logger.debug(f"Using Twilio Account SID: {masked_sid}")
         
         # Format number if needed (ensure it starts with whatsapp:)
         if not to_number.startswith('whatsapp:'):
@@ -179,7 +189,19 @@ def send_whatsapp_notification(order_id, ba_username, total_amount, item_count, 
             print(success_msg)  # Also print to console
             return True
         else:
-            error_msg = f'[ERROR] Twilio API error: {response.status_code} - {response.text}'
+            error_data = response.json() if response.text else {}
+            error_code = error_data.get('code', 'unknown')
+            error_message = error_data.get('message', response.text)
+            
+            # Provide specific error messages
+            if response.status_code == 401:
+                if error_code == 20003:
+                    error_msg = f'[ERROR] Twilio Authentication Error: Invalid Account SID or Auth Token. Please check your TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN in environment variables or admin settings.'
+                else:
+                    error_msg = f'[ERROR] Twilio Authentication Error ({error_code}): {error_message}'
+            else:
+                error_msg = f'[ERROR] Twilio API error: {response.status_code} - {error_message}'
+            
             app.logger.error(error_msg)
             print(error_msg)  # Also print to console
             return False
