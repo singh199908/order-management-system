@@ -65,7 +65,7 @@ This guide will help you deploy the Order Management System to Render.com.
    TWILIO_ACCOUNT_SID=your_account_sid_here
    TWILIO_AUTH_TOKEN=your_auth_token_here
    TWILIO_WHATSAPP_FROM=whatsapp:+14155238886
-   ADMIN_WHATSAPP_NUMBER=whatsapp:+918318794414
+   ADMIN_WHATSAPP_NUMBER=whatsapp:+1234567890
    TWILIO_CONTENT_SID=your_content_sid_here
    SECRET_KEY=<generate a random secret key>
    PORT=10000

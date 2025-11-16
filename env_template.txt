@@ -1,0 +1,23 @@
+# Copy this file to .env and update the SECRET_KEY
+# Flask Configuration
+SECRET_KEY=596c10a5330524c744dd88f69432d6532d6d6676f22ef0202fea5efd5c11aeb6
+
+# Twilio WhatsApp Configuration
+# Account SID from your Twilio account
+TWILIO_ACCOUNT_SID=your-twilio-account-sid-here
+
+# Auth Token from your Twilio account
+TWILIO_AUTH_TOKEN=your-twilio-auth-token-here
+
+# Twilio WhatsApp sender number (must start with whatsapp:)
+TWILIO_WHATSAPP_FROM=whatsapp:+14155238886
+
+# Your WhatsApp number to receive order notifications (must start with whatsapp:)
+ADMIN_WHATSAPP_NUMBER=whatsapp:+your-phone-number-here
+
+# Twilio Content Template SID (optional - not currently used in the app)
+TWILIO_CONTENT_SID=your-content-sid-here
+
+# Server Port (auto-set by Render, don't change)
+PORT=5000
+
