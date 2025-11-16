@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - Order Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-nav {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        h1 {
+            color: #333;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+        
+        .btn-logout {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-logout:hover {
+            background: #c82333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .orders-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .order-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: box-shadow 0.3s;
+        }
+        
+        .order-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .order-id {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .order-date {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .order-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-pending {
+            background: #ffc107;
+            color: #856404;
+        }
+        
+        .status-downloaded {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .status-confirmed {
+            background: #28a745;
+            color: white;
+        }
+        
+        .status-completed {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .order-items-list {
+            margin: 15px 0;
+        }
+        
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .order-item:last-child {
+            border-bottom: none;
+        }
+        
+        .item-details {
+            flex: 1;
+        }
+        
+        .item-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .item-meta {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .item-total {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .order-total {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .total-label {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .total-amount {
+            font-size: 20px;
+            font-weight: 700;
+            color: #667eea;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        
+        .empty-state h2 {
+            margin-bottom: 10px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>My Orders</h1>
+            <div class="header-nav">
+                <a href="{{ url_for('order_page') }}" class="btn" style="background: #667eea; color: white;">Place Order</a>
+                <a href="{{ url_for('my_orders') }}" class="btn" style="background: #6c757d; color: white;">My Orders</a>
+                <span>Welcome, <strong>{{ session.username }}</strong></span>
+                <a href="{{ url_for('logout') }}" class="btn btn-logout">Logout</a>
+            </div>
+        </div>
+        
+        <div class="orders-container">
+            {% if orders %}
+                {% for order in orders %}
+                    <div class="order-card">
+                        <div class="order-header">
+                            <div>
+                                <div class="order-id">Order #{{ order.id }}</div>
+                                <div class="order-date">{{ order.created_at.strftime('%B %d, %Y at %I:%M %p') }}</div>
+                            </div>
+                            <span class="order-status status-{{ order.status }}">{{ order.status }}</span>
+                        </div>
+                        
+                        <div class="order-items-list">
+                            {% set order_items = order.order_data|from_json %}
+                            {% for item in order_items %}
+                                <div class="order-item">
+                                    <div class="item-details">
+                                        <div class="item-name">{{ item.item_lot_type or 'N/A' }}</div>
+                                        <div class="item-meta">
+                                            Code: {{ item.lot_type_code or 'N/A' }} | 
+                                            Qty: {{ item.quantity }} × ₹{{ "%.2f"|format(item.mrp or 0) }}
+                                        </div>
+                                    </div>
+                                    <div class="item-total">₹{{ "%.2f"|format(item.total or 0) }}</div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="order-total">
+                            <span class="total-label">Total Amount:</span>
+                            <span class="total-amount">₹{{ "%.2f"|format(order.total_amount) }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <h2>No orders yet</h2>
+                    <p>Start placing orders to see them here</p>
+                    <a href="{{ url_for('order_page') }}" class="btn" style="background: #667eea; color: white; margin-top: 20px;">Place Your First Order</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
+
