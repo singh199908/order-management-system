@@ -196,6 +196,130 @@
             margin-bottom: 10px;
             color: #666;
         }
+        
+        /* Mobile and Tablet Responsive Styles */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 20px;
+                text-align: center;
+            }
+            
+            .header-nav {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+                width: 100%;
+            }
+            
+            .header-nav .btn {
+                padding: 8px 15px;
+                font-size: 12px;
+            }
+            
+            .orders-container {
+                padding: 15px;
+            }
+            
+            .order-card {
+                padding: 15px;
+            }
+            
+            .order-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .order-id {
+                font-size: 16px;
+            }
+            
+            .order-date {
+                font-size: 12px;
+            }
+            
+            .order-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            
+            .item-total {
+                align-self: flex-end;
+            }
+            
+            .order-total {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .total-amount {
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+            
+            .header {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 18px;
+            }
+            
+            .header-nav {
+                flex-direction: column;
+            }
+            
+            .header-nav .btn {
+                width: 100%;
+            }
+            
+            .orders-container {
+                padding: 10px;
+            }
+            
+            .order-card {
+                padding: 12px;
+            }
+            
+            .order-id {
+                font-size: 15px;
+            }
+            
+            .item-name {
+                font-size: 14px;
+            }
+            
+            .item-meta {
+                font-size: 11px;
+            }
+        }
+        
+        /* Tablet Styles */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .order-card {
+                padding: 18px;
+            }
+            
+            .orders-container {
+                padding: 18px;
+            }
+        }
     </style>
 </head>
 <body>

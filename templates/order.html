@@ -249,6 +249,140 @@
             padding: 40px;
             color: #666;
         }
+        
+        /* Mobile and Tablet Responsive Styles */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 20px;
+                text-align: center;
+            }
+            
+            .header-nav {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+            }
+            
+            .header-nav .btn {
+                padding: 8px 15px;
+                font-size: 12px;
+            }
+            
+            .header-nav span {
+                font-size: 14px;
+            }
+            
+            .container > div {
+                grid-template-columns: 1fr !important;
+            }
+            
+            .order-summary {
+                position: relative;
+                top: 0;
+                margin-top: 20px;
+            }
+            
+            .products-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .product-card {
+                padding: 15px;
+            }
+            
+            .product-card h3 {
+                font-size: 16px;
+            }
+            
+            .product-info {
+                font-size: 13px;
+            }
+            
+            .quantity-input input {
+                width: 70px;
+                padding: 6px;
+            }
+            
+            .order-item {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .btn-submit, .btn-save, .btn-load {
+                padding: 12px;
+                font-size: 14px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+            
+            .header {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 18px;
+            }
+            
+            .header-nav {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .header-nav .btn {
+                width: 100%;
+            }
+            
+            .product-card {
+                padding: 12px;
+            }
+            
+            .product-card h3 {
+                font-size: 15px;
+            }
+            
+            .order-summary {
+                padding: 15px;
+            }
+            
+            .order-total {
+                font-size: 18px;
+            }
+            
+            #search-input {
+                font-size: 14px;
+                padding: 10px;
+            }
+        }
+        
+        /* Tablet Styles */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .container > div {
+                grid-template-columns: 1fr 300px;
+            }
+            
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+            
+            .order-summary {
+                padding: 15px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -267,7 +401,7 @@
         
         <div id="alert-container"></div>
         
-        <div style="display: grid; grid-template-columns: 1fr 350px; gap: 20px;">
+        <div style="display: grid; grid-template-columns: 1fr 350px; gap: 20px;" class="main-content-grid">
             <div>
                 <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;">
                     <input type="text" 

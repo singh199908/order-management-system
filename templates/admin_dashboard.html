@@ -375,6 +375,168 @@
         .order-details-item:last-child {
             border-bottom: none;
         }
+        
+        /* Mobile and Tablet Responsive Styles */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 20px;
+                text-align: center;
+            }
+            
+            .user-info {
+                flex-direction: column;
+                width: 100%;
+                gap: 10px;
+            }
+            
+            .user-info .btn {
+                width: 100%;
+            }
+            
+            .tabs {
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+            
+            .tab {
+                padding: 8px 15px;
+                font-size: 12px;
+                flex: 1;
+                min-width: 100px;
+            }
+            
+            .card {
+                padding: 15px;
+            }
+            
+            .orders-table {
+                display: block;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .orders-table thead,
+            .orders-table tbody,
+            .orders-table tr,
+            .orders-table td,
+            .orders-table th {
+                display: block;
+            }
+            
+            .orders-table thead {
+                display: none;
+            }
+            
+            .orders-table tr {
+                border: 1px solid #ddd;
+                margin-bottom: 10px;
+                padding: 10px;
+                background: white;
+                border-radius: 5px;
+            }
+            
+            .orders-table td {
+                border: none;
+                padding: 8px;
+                text-align: right;
+                position: relative;
+                padding-left: 50%;
+            }
+            
+            .orders-table td:before {
+                content: attr(data-label);
+                position: absolute;
+                left: 8px;
+                font-weight: 600;
+                text-align: left;
+            }
+            
+            .form-group {
+                margin-bottom: 15px;
+            }
+            
+            .form-group input,
+            .form-group textarea {
+                width: 100%;
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+            
+            .btn-download,
+            .btn-delete {
+                width: 100%;
+                margin: 5px 0;
+            }
+            
+            .notification {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+            
+            .header {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 18px;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                width: 100%;
+            }
+            
+            .card {
+                padding: 10px;
+            }
+            
+            .card h2 {
+                font-size: 18px;
+            }
+            
+            .upload-section {
+                padding: 15px;
+            }
+        }
+        
+        /* Tablet Styles */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .orders-table {
+                font-size: 14px;
+            }
+            
+            .orders-table th,
+            .orders-table td {
+                padding: 10px 8px;
+            }
+            
+            .card {
+                padding: 15px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -596,9 +758,9 @@
                         <tbody>
                             ${orders.map(order => `
                                 <tr>
-                                    <td>#${order.id}</td>
-                                    <td>${order.username}</td>
-                                    <td>
+                                    <td data-label="Order ID">#${order.id}</td>
+                                    <td data-label="BA Username">${order.username}</td>
+                                    <td data-label="Items">
                                         <div class="order-details">
                                             ${order.order_data.map(item => `
                                                 <div class="order-details-item">
@@ -607,10 +769,10 @@
                                             `).join('')}
                                         </div>
                                     </td>
-                                    <td>₹${order.total_amount.toFixed(2)}</td>
-                                    <td><span class="status-badge status-${order.status}">${order.status}</span></td>
-                                    <td>${order.created_at}</td>
-                                    <td>
+                                    <td data-label="Total Amount">₹${order.total_amount.toFixed(2)}</td>
+                                    <td data-label="Status"><span class="status-badge status-${order.status}">${order.status}</span></td>
+                                    <td data-label="Date">${order.created_at}</td>
+                                    <td data-label="Actions">
                                         <a href="/admin/download_order/${order.id}" class="btn-download" onclick="handleDownload(${order.id}, event)">
                                             📥 Download
                                         </a>
