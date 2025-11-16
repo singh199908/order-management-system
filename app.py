@@ -91,16 +91,33 @@ class SavedCart(db.Model):
 # Create tables
 with app.app_context():
     db.create_all()
-    # Create default admin user if it doesn't exist
-    admin = User.query.filter_by(username='admin').first()
-    if not admin:
+    
+    # Delete all existing BA users
+    ba_users = User.query.filter_by(role='ba').all()
+    for ba_user in ba_users:
+        db.session.delete(ba_user)
+    
+    # Create/update default admin user
+    admin = User.query.filter_by(username='rtc').first()
+    if admin:
+        # Update existing admin password
+        admin.password_hash = generate_password_hash('rtc1336')
+        admin.role = 'admin'
+    else:
+        # Delete old admin user if exists
+        old_admin = User.query.filter_by(username='admin').first()
+        if old_admin:
+            db.session.delete(old_admin)
+        
+        # Create new admin user
         admin = User(
-            username='admin',
-            password_hash=generate_password_hash('admin123'),
+            username='rtc',
+            password_hash=generate_password_hash('rtc1336'),
             role='admin'
         )
         db.session.add(admin)
-        db.session.commit()
+    
+    db.session.commit()
 
 # WhatsApp notification function
 def send_whatsapp_notification(order_id, ba_username, total_amount, item_count, to_number=None):
