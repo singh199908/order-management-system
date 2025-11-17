@@ -47,6 +47,12 @@ if sys.platform == 'win32':
 app = Flask(__name__)
 app.logger.setLevel(logging.INFO)
 
+# Trust proxy headers on Render (so Flask knows requests are HTTPS)
+# This is needed for OAuth to work correctly on Render
+if os.environ.get('RENDER') or os.environ.get('FLASK_ENV') == 'production':
+    from werkzeug.middleware.proxy_fix import ProxyFix
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+
 # Configure logging to both console and file
 logging.basicConfig(
     level=logging.INFO,
@@ -1250,7 +1256,16 @@ def oauth2callback():
         )
         flow.redirect_uri = redirect_uri
         
-        authorization_response = request.url
+        # Construct authorization response URL - ensure it uses HTTPS on Render
+        # request.url might be HTTP if Flask doesn't know about the proxy
+        if request.is_secure or os.environ.get('RENDER') or os.environ.get('FLASK_ENV') == 'production':
+            # Use HTTPS for the callback URL
+            scheme = 'https'
+        else:
+            scheme = request.scheme
+        
+        authorization_response = f"{scheme}://{request.host}{request.full_path}"
+        app.logger.info(f'OAuth callback URL: {authorization_response}')
         flow.fetch_token(authorization_response=authorization_response)
         
         credentials = flow.credentials
