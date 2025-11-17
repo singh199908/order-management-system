@@ -20,7 +20,9 @@ except ImportError:
 
 # Allow insecure transport for OAuth on localhost (development only)
 # This is required because oauthlib requires HTTPS by default
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+# Only enable for localhost, not for production (Render uses HTTPS)
+if os.environ.get('FLASK_ENV') != 'production' and 'localhost' in os.environ.get('GOOGLE_OAUTH_REDIRECT_URI', ''):
+    os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 try:
     import gspread
@@ -1221,10 +1223,6 @@ def oauth2callback():
     redirect_uri = app.config.get('GOOGLE_OAUTH_REDIRECT_URI')
     
     try:
-        # Allow insecure transport for localhost (development only)
-        import os
-        os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-        
         flow = Flow.from_client_config(
             {
                 "web": {
