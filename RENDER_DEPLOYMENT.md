@@ -62,20 +62,22 @@ This guide will help you deploy the Order Management System to Render.com.
 4. **Set Environment Variables:**
    Click "Advanced" → "Add Environment Variable" and add:
    ```
+   SECRET_KEY=<generate a random secret key>
    TWILIO_ACCOUNT_SID=your_account_sid_here
    TWILIO_AUTH_TOKEN=your_auth_token_here
    TWILIO_WHATSAPP_FROM=whatsapp:+14155238886
    ADMIN_WHATSAPP_NUMBER=whatsapp:+1234567890
-   TWILIO_CONTENT_SID=your_content_sid_here
-   SECRET_KEY=<generate a random secret key>
-    DATABASE_URL=<render-postgres-connection-string>
-    # Choose ONE of the following for Google credentials
-    GOOGLE_SERVICE_ACCOUNT_JSON=<paste-json-here>
-    # or
-    GOOGLE_SERVICE_ACCOUNT_FILE=service_account.json
-    GOOGLE_DRIVE_FOLDER_ID=<optional-folder-id>
+   DATABASE_URL=<render-postgres-connection-string>
+   # Google OAuth (Recommended - uses your personal storage)
+   GOOGLE_OAUTH_CLIENT_ID=your-oauth-client-id.apps.googleusercontent.com
+   GOOGLE_OAUTH_CLIENT_SECRET=GOCSPX-your-client-secret
+   GOOGLE_OAUTH_REDIRECT_URI=https://your-app-name.onrender.com/oauth2callback
+   GOOGLE_DRIVE_FOLDER_ID=<optional-folder-id>
    ```
-   > Render sets `PORT` automatically, so you don't need to define it manually.
+   > **Important**: 
+   > - Replace `your-app-name` in `GOOGLE_OAUTH_REDIRECT_URI` with your actual Render app name
+   > - Update the redirect URI in Google Cloud Console OAuth Client settings to match
+   > - Render sets `PORT` automatically, so you don't need to define it manually
 
 5. **Deploy:**
    - Click "Create Web Service"

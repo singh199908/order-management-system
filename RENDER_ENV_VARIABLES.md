@@ -54,16 +54,31 @@ This document lists all environment variables that need to be set in your Render
 - **Example**: `postgresql://user:pass@host:5432/dbname`
 - **Note**: Strongly recommended in production
 
-### 9. **GOOGLE_SERVICE_ACCOUNT_FILE** or **GOOGLE_SERVICE_ACCOUNT_JSON** (Optional but required for Google Sheets backups)
-- **Purpose**: Credentials for the Google service account that can create spreadsheets in your Drive
-- **How to use**:
-  - **GOOGLE_SERVICE_ACCOUNT_FILE**: path to the JSON file on disk (e.g., `service_account.json`)
-  - **GOOGLE_SERVICE_ACCOUNT_JSON**: paste the full JSON content directly into an env var (useful on Render)
-- **Note**: Set at least one of these for per-order Google Sheet backups to work
+### 9. **GOOGLE_OAUTH_CLIENT_ID** (Recommended for Google Sheets)
+- **Purpose**: OAuth 2.0 Client ID for Google Drive/Sheets access
+- **Where to find**: Google Cloud Console → APIs & Services → Credentials → OAuth 2.0 Client ID
+- **Example**: `529145545514-xxxxx.apps.googleusercontent.com`
+- **Note**: OAuth uses your personal Google account storage (2TB) instead of service account limits
 
-### 10. **GOOGLE_DRIVE_FOLDER_ID** (Optional)
+### 10. **GOOGLE_OAUTH_CLIENT_SECRET** (Recommended for Google Sheets)
+- **Purpose**: OAuth 2.0 Client Secret for Google Drive/Sheets access
+- **Where to find**: Google Cloud Console → APIs & Services → Credentials → OAuth 2.0 Client ID
+- **Example**: `GOCSPX-xxxxx`
+- **⚠️ Keep this secret!**
+
+### 11. **GOOGLE_OAUTH_REDIRECT_URI** (Required if using OAuth)
+- **Purpose**: OAuth callback URL - must match your Render app URL
+- **Format**: `https://your-app-name.onrender.com/oauth2callback`
+- **Example**: `https://order-management-system.onrender.com/oauth2callback`
+- **Important**: Update this in Google Cloud Console OAuth Client settings too!
+
+### 12. **GOOGLE_SERVICE_ACCOUNT_FILE** or **GOOGLE_SERVICE_ACCOUNT_JSON** (Optional - fallback)
+- **Purpose**: Service account credentials (fallback if OAuth not configured)
+- **Note**: OAuth is preferred as it uses your personal storage quota
+
+### 13. **GOOGLE_DRIVE_FOLDER_ID** (Optional)
 - **Purpose**: Drive folder ID where new per-order spreadsheets should be stored
-- **Note**: Leave blank to create sheets at the root of the service account drive. Share the folder with the service account if you set this.
+- **Note**: Share the folder with your Google account (for OAuth) or service account (for service account auth)
 
 ## How to Set Environment Variables on Render
 
@@ -93,7 +108,7 @@ This document lists all environment variables that need to be set in your Render
 SECRET_KEY=<your-secret-key>
 ```
 
-**For Full Functionality (with WhatsApp):**
+**For Full Functionality (with WhatsApp and Google Sheets):**
 ```
 SECRET_KEY=<your-secret-key>
 TWILIO_ACCOUNT_SID=<your-account-sid>
@@ -101,7 +116,9 @@ TWILIO_AUTH_TOKEN=<your-auth-token>
 TWILIO_WHATSAPP_FROM=whatsapp:+14155238886
 ADMIN_WHATSAPP_NUMBER=whatsapp:+1234567890
 DATABASE_URL=<postgres-connection-string>
-GOOGLE_SERVICE_ACCOUNT_JSON=<full-json-or-leave-empty-if-using-file>
+GOOGLE_OAUTH_CLIENT_ID=<your-oauth-client-id>
+GOOGLE_OAUTH_CLIENT_SECRET=<your-oauth-client-secret>
+GOOGLE_OAUTH_REDIRECT_URI=https://your-app-name.onrender.com/oauth2callback
 GOOGLE_DRIVE_FOLDER_ID=<optional-folder-id>
 ```
 

@@ -7,8 +7,18 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
-      # IMPORTANT: Set Twilio credentials as environment variables in Render dashboard
+      # IMPORTANT: Set all credentials as environment variables in Render dashboard
       # Do not commit credentials to this file!
       - key: SECRET_KEY
         generateValue: true
+      # Set these in Render dashboard:
+      # - TWILIO_ACCOUNT_SID
+      # - TWILIO_AUTH_TOKEN
+      # - TWILIO_WHATSAPP_FROM
+      # - ADMIN_WHATSAPP_NUMBER
+      # - GOOGLE_OAUTH_CLIENT_ID
+      # - GOOGLE_OAUTH_CLIENT_SECRET
+      # - GOOGLE_OAUTH_REDIRECT_URI (use your Render URL)
+      # - GOOGLE_DRIVE_FOLDER_ID
+      # - DATABASE_URL (if using Render PostgreSQL)
 
