@@ -1171,8 +1171,20 @@ def google_authorize():
     client_secret = app.config.get('GOOGLE_OAUTH_CLIENT_SECRET')
     redirect_uri = app.config.get('GOOGLE_OAUTH_REDIRECT_URI')
     
+    # Also check environment variable directly
+    if not redirect_uri:
+        redirect_uri = os.environ.get('GOOGLE_OAUTH_REDIRECT_URI', '')
+    
+    # Log the redirect URI being used for debugging
+    app.logger.info(f'OAuth redirect URI being used: {redirect_uri}')
+    
     if not client_id or not client_secret:
         flash('Google OAuth not configured. Set GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET.', 'error')
+        return redirect(url_for('admin_dashboard'))
+    
+    if not redirect_uri:
+        flash('GOOGLE_OAUTH_REDIRECT_URI not configured. Set it in environment variables.', 'error')
+        app.logger.error('GOOGLE_OAUTH_REDIRECT_URI is not set!')
         return redirect(url_for('admin_dashboard'))
     
     try:
