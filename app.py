@@ -102,7 +102,7 @@ db = SQLAlchemy(app)
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
-    password_hash = db.Column(db.String(120), nullable=False)
+    password_hash = db.Column(db.String(200), nullable=False)  # Increased for scrypt hashes
     role = db.Column(db.String(20), nullable=False)  # 'admin' or 'ba'
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -424,6 +424,27 @@ with app.app_context():
                 connection.execute(text('ALTER TABLE "order" ADD COLUMN sheet_url VARCHAR(500)'))
     except Exception as e:
         app.logger.warning(f'Could not verify/add sheet_url column: {str(e)}')
+    
+    # Ensure password_hash column is large enough for scrypt hashes (PostgreSQL migration)
+    try:
+        inspector = inspect(db.engine)
+        user_columns = {col['name']: col for col in inspector.get_columns('user')}
+        if 'password_hash' in user_columns:
+            password_hash_col = user_columns['password_hash']
+            # Check if it's VARCHAR and too small (less than 200)
+            if 'VARCHAR' in str(password_hash_col['type']).upper() or 'CHARACTER VARYING' in str(password_hash_col['type']).upper():
+                # Try to get the length - PostgreSQL stores it differently
+                col_type = str(password_hash_col['type'])
+                # If it's a small VARCHAR, alter it
+                if 'VARCHAR(120)' in col_type or 'CHARACTER VARYING(120)' in col_type:
+                    app.logger.info('Updating password_hash column size to 200 for scrypt hashes')
+                    with db.engine.connect() as connection:
+                        # PostgreSQL uses ALTER COLUMN TYPE
+                        connection.execute(text('ALTER TABLE "user" ALTER COLUMN password_hash TYPE VARCHAR(200)'))
+                        connection.commit()
+                        app.logger.info('Successfully updated password_hash column size')
+    except Exception as e:
+        app.logger.warning(f'Could not verify/update password_hash column: {str(e)}')
     
     # Create/update default admin user
     admin = User.query.filter_by(username='rtc').first()
