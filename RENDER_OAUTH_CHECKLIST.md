@@ -55,7 +55,7 @@ https://order-management-system-q40k.onrender.com/oauth2callback
 
 1. Place a test order
 2. Check your Google Drive folder
-3. The sheet should appear in: `1SWKqTRDRaRMRhyH9RJL25xTr1Y1C_HBu`
+3. The sheet should appear in your configured folder
 
 ## Troubleshooting
 
