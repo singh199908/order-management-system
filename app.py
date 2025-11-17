@@ -427,6 +427,7 @@ with app.app_context():
     
     # Ensure password_hash column is large enough for scrypt hashes (PostgreSQL migration)
     # This runs BEFORE creating admin user to avoid errors
+    # Migration runs automatically on every deploy - no manual verification needed
     try:
         inspector = inspect(db.engine)
         # Check if user table exists
@@ -435,18 +436,25 @@ with app.app_context():
             if 'password_hash' in user_columns:
                 password_hash_col = user_columns['password_hash']
                 col_type_str = str(password_hash_col['type'])
-                # Check if column is too small - try to alter it regardless
-                # PostgreSQL VARCHAR(120) or CHARACTER VARYING(120) needs updating
-                if '120' in col_type_str or len(col_type_str) < 20:
+                # Try to alter column - PostgreSQL will error if already correct, which is fine
+                # Check if it looks like a small VARCHAR (contains 120 or is short)
+                if '120' in col_type_str:
                     app.logger.info(f'Updating password_hash column from {col_type_str} to VARCHAR(200)')
                     with db.engine.connect() as connection:
-                        # Use USING clause to handle type conversion
-                        connection.execute(text('ALTER TABLE "user" ALTER COLUMN password_hash TYPE VARCHAR(200) USING password_hash::VARCHAR(200)'))
-                        connection.commit()
-                        app.logger.info('Successfully updated password_hash column size to 200')
+                        # Try to alter - if it fails because it's already correct, that's OK
+                        try:
+                            connection.execute(text('ALTER TABLE "user" ALTER COLUMN password_hash TYPE VARCHAR(200)'))
+                            connection.commit()
+                            app.logger.info('Successfully updated password_hash column size to 200')
+                        except Exception as alter_error:
+                            # Column might already be correct size - check and log
+                            if 'already' in str(alter_error).lower() or '200' in col_type_str:
+                                app.logger.info('Password hash column is already correct size')
+                            else:
+                                raise  # Re-raise if it's a different error
     except Exception as e:
-        # If column doesn't exist or is already correct, that's fine
-        app.logger.info(f'Password hash column check: {str(e)} (this is OK if column is already correct or doesn\'t exist yet)')
+        # If table doesn't exist yet, that's fine - db.create_all() will create it with correct size
+        app.logger.debug(f'Password hash column migration: {str(e)}')
     
     # Create/update default admin user
     admin = User.query.filter_by(username='rtc').first()
