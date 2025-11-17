@@ -171,12 +171,14 @@ def get_google_credentials():
         try:
             oauth_token = GoogleOAuthToken.query.first()
             if oauth_token:
+                app.logger.info('Found OAuth token in database, loading...')
                 token_dict = json.loads(oauth_token.token_data)
                 credentials = Credentials.from_authorized_user_info(token_dict, GOOGLE_SCOPES)
                 
                 # Refresh token if expired
                 if credentials.expired and credentials.refresh_token:
                     try:
+                        app.logger.info('OAuth token expired, refreshing...')
                         credentials.refresh(Request())
                         # Save refreshed token
                         oauth_token.token_data = json.dumps({
@@ -196,20 +198,25 @@ def get_google_credentials():
                 app._google_credentials = credentials
                 app.logger.info('Google OAuth credentials loaded successfully.')
                 return credentials
+            else:
+                app.logger.warning('No OAuth token found in database. OAuth not authorized. Use /admin/google/authorize to authorize.')
         except Exception as e:
             app.logger.warning(f'Error loading OAuth credentials: {str(e)}')
     
     # Fall back to service account if OAuth not available
+    # But log a warning that OAuth is preferred
     if service_account:
         credentials_json = app.config.get('GOOGLE_SERVICE_ACCOUNT_JSON')
         credentials_file = app.config.get('GOOGLE_SERVICE_ACCOUNT_FILE')
         
         try:
             if credentials_json:
+                app.logger.warning('Using service account (OAuth not available). Service accounts have storage limitations.')
                 app.logger.info('Loading Google credentials from GOOGLE_SERVICE_ACCOUNT_JSON environment variable.')
                 info = json.loads(credentials_json)
                 credentials = service_account.Credentials.from_service_account_info(info, scopes=GOOGLE_SCOPES)
             elif credentials_file and os.path.exists(credentials_file):
+                app.logger.warning('Using service account (OAuth not available). Service accounts have storage limitations.')
                 app.logger.info(f'Loading Google credentials from file: {credentials_file}')
                 credentials = service_account.Credentials.from_service_account_file(credentials_file, scopes=GOOGLE_SCOPES)
             else:
