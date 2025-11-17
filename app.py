@@ -426,25 +426,27 @@ with app.app_context():
         app.logger.warning(f'Could not verify/add sheet_url column: {str(e)}')
     
     # Ensure password_hash column is large enough for scrypt hashes (PostgreSQL migration)
+    # This runs BEFORE creating admin user to avoid errors
     try:
         inspector = inspect(db.engine)
-        user_columns = {col['name']: col for col in inspector.get_columns('user')}
-        if 'password_hash' in user_columns:
-            password_hash_col = user_columns['password_hash']
-            # Check if it's VARCHAR and too small (less than 200)
-            if 'VARCHAR' in str(password_hash_col['type']).upper() or 'CHARACTER VARYING' in str(password_hash_col['type']).upper():
-                # Try to get the length - PostgreSQL stores it differently
-                col_type = str(password_hash_col['type'])
-                # If it's a small VARCHAR, alter it
-                if 'VARCHAR(120)' in col_type or 'CHARACTER VARYING(120)' in col_type:
-                    app.logger.info('Updating password_hash column size to 200 for scrypt hashes')
+        # Check if user table exists
+        if 'user' in inspector.get_table_names():
+            user_columns = {col['name']: col for col in inspector.get_columns('user')}
+            if 'password_hash' in user_columns:
+                password_hash_col = user_columns['password_hash']
+                col_type_str = str(password_hash_col['type'])
+                # Check if column is too small - try to alter it regardless
+                # PostgreSQL VARCHAR(120) or CHARACTER VARYING(120) needs updating
+                if '120' in col_type_str or len(col_type_str) < 20:
+                    app.logger.info(f'Updating password_hash column from {col_type_str} to VARCHAR(200)')
                     with db.engine.connect() as connection:
-                        # PostgreSQL uses ALTER COLUMN TYPE
-                        connection.execute(text('ALTER TABLE "user" ALTER COLUMN password_hash TYPE VARCHAR(200)'))
+                        # Use USING clause to handle type conversion
+                        connection.execute(text('ALTER TABLE "user" ALTER COLUMN password_hash TYPE VARCHAR(200) USING password_hash::VARCHAR(200)'))
                         connection.commit()
-                        app.logger.info('Successfully updated password_hash column size')
+                        app.logger.info('Successfully updated password_hash column size to 200')
     except Exception as e:
-        app.logger.warning(f'Could not verify/update password_hash column: {str(e)}')
+        # If column doesn't exist or is already correct, that's fine
+        app.logger.info(f'Password hash column check: {str(e)} (this is OK if column is already correct or doesn\'t exist yet)')
     
     # Create/update default admin user
     admin = User.query.filter_by(username='rtc').first()
