@@ -262,6 +262,10 @@ def create_order_spreadsheet(order, ba_username=None):
     
     try:
         folder_id = app.config.get('GOOGLE_DRIVE_FOLDER_ID') or None
+        # Also check environment variable directly in case config didn't load
+        if not folder_id:
+            folder_id = os.environ.get('GOOGLE_DRIVE_FOLDER_ID') or None
+        
         spreadsheet = None
         
         # Try to create in folder if folder_id is provided
