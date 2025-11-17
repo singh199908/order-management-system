@@ -9,13 +9,31 @@ import json
 import sys
 from io import BytesIO
 from sqlalchemy import inspect, text
+import logging
+
+# Load environment variables from .env if python-dotenv is installed
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
+# Allow insecure transport for OAuth on localhost (development only)
+# This is required because oauthlib requires HTTPS by default
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 try:
     import gspread
     from google.oauth2 import service_account
+    from google_auth_oauthlib.flow import Flow
+    from google.oauth2.credentials import Credentials
+    from google.auth.transport.requests import Request
 except ImportError:
     gspread = None
     service_account = None
+    Flow = None
+    Credentials = None
+    Request = None
 
 # Fix Windows console encoding for print statements
 if sys.platform == 'win32':
@@ -25,6 +43,17 @@ if sys.platform == 'win32':
         pass
 
 app = Flask(__name__)
+app.logger.setLevel(logging.INFO)
+
+# Configure logging to both console and file
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('app.log', encoding='utf-8'),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key-change-this-in-production')
 database_url = os.environ.get('DATABASE_URL')
 if database_url:
@@ -50,6 +79,10 @@ app.config['TWILIO_CONTENT_SID'] = os.environ.get('TWILIO_CONTENT_SID', '')
 app.config['GOOGLE_SERVICE_ACCOUNT_FILE'] = os.environ.get('GOOGLE_SERVICE_ACCOUNT_FILE', '')
 app.config['GOOGLE_SERVICE_ACCOUNT_JSON'] = os.environ.get('GOOGLE_SERVICE_ACCOUNT_JSON', '')
 app.config['GOOGLE_DRIVE_FOLDER_ID'] = os.environ.get('GOOGLE_DRIVE_FOLDER_ID', '')
+# OAuth Configuration
+app.config['GOOGLE_OAUTH_CLIENT_ID'] = os.environ.get('GOOGLE_OAUTH_CLIENT_ID', '')
+app.config['GOOGLE_OAUTH_CLIENT_SECRET'] = os.environ.get('GOOGLE_OAUTH_CLIENT_SECRET', '')
+app.config['GOOGLE_OAUTH_REDIRECT_URI'] = os.environ.get('GOOGLE_OAUTH_REDIRECT_URI', 'http://localhost:5000/oauth2callback')
 
 
 # Create upload folder if it doesn't exist
@@ -103,6 +136,12 @@ class SavedCart(db.Model):
     
     user = db.relationship('User', backref=db.backref('saved_carts', lazy=True))
 
+class GoogleOAuthToken(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    token_data = db.Column(db.Text, nullable=False)  # JSON string of OAuth token
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
 GOOGLE_SCOPES = [
     'https://www.googleapis.com/auth/spreadsheets',
     'https://www.googleapis.com/auth/drive'
@@ -110,8 +149,8 @@ GOOGLE_SCOPES = [
 
 
 def get_google_credentials():
-    """Return cached Google service account credentials if configured."""
-    if not service_account:
+    """Return Google credentials - OAuth tokens (preferred) or service account."""
+    if not Credentials and not service_account:
         app.logger.warning('google-auth is not installed. Skipping Google Sheets backup.')
         return None
     
@@ -119,24 +158,64 @@ def get_google_credentials():
     if cached_credentials:
         return cached_credentials
     
-    credentials_json = app.config.get('GOOGLE_SERVICE_ACCOUNT_JSON')
-    credentials_file = app.config.get('GOOGLE_SERVICE_ACCOUNT_FILE')
+    # Try OAuth credentials first (preferred for personal accounts)
+    if Credentials:
+        try:
+            oauth_token = GoogleOAuthToken.query.first()
+            if oauth_token:
+                token_dict = json.loads(oauth_token.token_data)
+                credentials = Credentials.from_authorized_user_info(token_dict, GOOGLE_SCOPES)
+                
+                # Refresh token if expired
+                if credentials.expired and credentials.refresh_token:
+                    try:
+                        credentials.refresh(Request())
+                        # Save refreshed token
+                        oauth_token.token_data = json.dumps({
+                            'token': credentials.token,
+                            'refresh_token': credentials.refresh_token,
+                            'token_uri': credentials.token_uri,
+                            'client_id': credentials.client_id,
+                            'client_secret': credentials.client_secret,
+                            'scopes': credentials.scopes
+                        })
+                        db.session.commit()
+                        app.logger.info('OAuth token refreshed successfully.')
+                    except Exception as refresh_error:
+                        app.logger.error(f'Error refreshing OAuth token: {str(refresh_error)}')
+                        return None
+                
+                app._google_credentials = credentials
+                app.logger.info('Google OAuth credentials loaded successfully.')
+                return credentials
+        except Exception as e:
+            app.logger.warning(f'Error loading OAuth credentials: {str(e)}')
     
-    try:
-        if credentials_json:
-            info = json.loads(credentials_json)
-            credentials = service_account.Credentials.from_service_account_info(info, scopes=GOOGLE_SCOPES)
-        elif credentials_file and os.path.exists(credentials_file):
-            credentials = service_account.Credentials.from_service_account_file(credentials_file, scopes=GOOGLE_SCOPES)
-        else:
-            app.logger.warning('Google service account not configured. Set GOOGLE_SERVICE_ACCOUNT_FILE or GOOGLE_SERVICE_ACCOUNT_JSON to enable backups.')
-            return None
+    # Fall back to service account if OAuth not available
+    if service_account:
+        credentials_json = app.config.get('GOOGLE_SERVICE_ACCOUNT_JSON')
+        credentials_file = app.config.get('GOOGLE_SERVICE_ACCOUNT_FILE')
         
-        app._google_credentials = credentials
-        return credentials
-    except Exception as e:
-        app.logger.error(f'Error loading Google credentials: {str(e)}', exc_info=True)
-        return None
+        try:
+            if credentials_json:
+                app.logger.info('Loading Google credentials from GOOGLE_SERVICE_ACCOUNT_JSON environment variable.')
+                info = json.loads(credentials_json)
+                credentials = service_account.Credentials.from_service_account_info(info, scopes=GOOGLE_SCOPES)
+            elif credentials_file and os.path.exists(credentials_file):
+                app.logger.info(f'Loading Google credentials from file: {credentials_file}')
+                credentials = service_account.Credentials.from_service_account_file(credentials_file, scopes=GOOGLE_SCOPES)
+            else:
+                app.logger.warning('No Google credentials configured. Use OAuth or set GOOGLE_SERVICE_ACCOUNT_FILE.')
+                return None
+            
+            app._google_credentials = credentials
+            app.logger.info('Google service account credentials loaded successfully.')
+            return credentials
+        except Exception as e:
+            app.logger.error(f'Error loading Google credentials: {str(e)}', exc_info=True)
+            return None
+    
+    return None
 
 
 def get_gspread_client():
@@ -151,30 +230,72 @@ def get_gspread_client():
     
     credentials = get_google_credentials()
     if not credentials:
+        app.logger.warning('Google credentials unavailable. Skipping Sheets backup.')
         return None
     
     try:
         client = gspread.authorize(credentials)
         app._gspread_client = client
+        app.logger.info('gspread client created successfully.')
         return client
     except Exception as e:
         app.logger.error(f'Error creating gspread client: {str(e)}', exc_info=True)
         return None
 
 
-def create_order_spreadsheet(order):
+def create_order_spreadsheet(order, ba_username=None):
     """Create a dedicated Google Sheet for the given order and return its URL."""
     client = get_gspread_client()
     if not client:
         return None
     
-    ba_username = order.user.username if order.user else 'Unknown BA'
+    app.logger.info(f'Preparing to create Google Sheet for order #{order.id}')
+    
+    # Use provided username or try to get from order.user relationship
+    if not ba_username:
+        try:
+            ba_username = order.user.username if order.user else 'Unknown BA'
+        except Exception:
+            ba_username = 'Unknown BA'
     order_date = order.created_at.strftime('%Y-%m-%d %H:%M:%S') if order.created_at else datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
     sheet_title = f'Order #{order.id} - {ba_username} - {order.created_at.strftime("%Y-%m-%d") if order.created_at else datetime.utcnow().strftime("%Y-%m-%d")}'
     
     try:
         folder_id = app.config.get('GOOGLE_DRIVE_FOLDER_ID') or None
-        spreadsheet = client.create(sheet_title, folder_id=folder_id)
+        spreadsheet = None
+        
+        # Try to create in folder if folder_id is provided
+        if folder_id:
+            app.logger.info(f'Using Google Drive folder ID: {folder_id}')
+            try:
+                spreadsheet = client.create(sheet_title, folder_id=folder_id)
+                app.logger.info(f'Successfully created sheet in folder for order #{order.id}')
+            except Exception as folder_error:
+                error_str = str(folder_error)
+                # Check if it's a quota error - don't fallback to root if quota is exceeded
+                if 'quota' in error_str.lower() or 'storage' in error_str.lower():
+                    app.logger.error(f'Google Drive storage quota exceeded. Cannot create sheet for order #{order.id}')
+                    raise  # Re-raise quota errors - they'll be caught by outer handler
+                # If folder not found (404) or permission denied (but not quota), fallback to root
+                elif '404' in error_str or 'not found' in error_str.lower() or ('403' in error_str and 'quota' not in error_str.lower()):
+                    app.logger.warning(f'Failed to create sheet in folder (ID: {folder_id}): {error_str}')
+                    app.logger.info(f'Falling back to creating sheet in root for order #{order.id}')
+                    try:
+                        spreadsheet = client.create(sheet_title)
+                    except Exception as root_error:
+                        root_error_str = str(root_error)
+                        # If root also fails with quota, don't try again
+                        if 'quota' in root_error_str.lower() or 'storage' in root_error_str.lower():
+                            app.logger.error(f'Google Drive storage quota exceeded in root as well for order #{order.id}')
+                            raise
+                        else:
+                            raise
+                else:
+                    # Re-raise if it's a different error
+                    raise
+        else:
+            app.logger.info('No Google Drive folder ID provided. Creating sheet in root.')
+            spreadsheet = client.create(sheet_title)
         worksheet = spreadsheet.sheet1
         
         metadata_rows = [
@@ -219,7 +340,63 @@ def create_order_spreadsheet(order):
         return spreadsheet.url
     
     except Exception as e:
-        app.logger.error(f'Error creating Google Sheet for order #{order.id}: {str(e)}', exc_info=True)
+        error_msg = str(e)
+        # Get more detailed error information
+        error_details = {
+            'error_type': type(e).__name__,
+            'error_message': error_msg,
+        }
+        
+        # Check for gspread APIError (quota, permissions, etc.)
+        if gspread and hasattr(gspread, 'exceptions'):
+            if isinstance(e, gspread.exceptions.APIError):
+                # Get response details if available
+                if hasattr(e, 'response'):
+                    error_details['status_code'] = getattr(e.response, 'status_code', None)
+                    try:
+                        if hasattr(e.response, 'json'):
+                            error_details['response_body'] = e.response.json()
+                        elif hasattr(e.response, 'text'):
+                            error_details['response_text'] = e.response.text
+                    except Exception as resp_err:
+                        error_details['response_error'] = str(resp_err)
+                
+                # Also check for error details in the exception itself
+                if hasattr(e, 'args') and e.args:
+                    error_details['exception_args'] = str(e.args)
+                
+                # Log full error details
+                app.logger.error(f'Google Sheets APIError for order #{order.id}: {error_details}')
+                
+                if '403' in error_msg or 'quota' in error_msg.lower() or 'storage' in error_msg.lower():
+                    # Service accounts don't have storage quotas - files must be in Shared Drive or use domain-wide delegation
+                    quota_error = f'Google Drive storage quota error for order #{order.id}. Error: {error_msg}. '
+                    quota_error += 'SOLUTION: Service accounts cannot own files. You need to either: '
+                    quota_error += '1) Use a Google Workspace Shared Drive, or 2) Use domain-wide delegation to impersonate a user.'
+                    app.logger.error(quota_error)
+                    print(f"[ERROR] Google Drive storage quota error: {error_msg}")
+                    print(f"[INFO] Service accounts don't have storage quotas. Files must be created in a Shared Drive or via domain-wide delegation.")
+                    print(f"[INFO] Your personal storage has space, but the service account cannot create files in regular folders.")
+                elif '403' in error_msg or 'permission' in error_msg.lower():
+                    perm_error = 'Google Drive permission denied for order #{}: {}'.format(order.id, error_msg)
+                    app.logger.error(perm_error)
+                    print(f"[ERROR] Google Drive permission denied: {error_msg}")
+                else:
+                    api_error = 'Google Sheets API error for order #{}: {}'.format(order.id, error_msg)
+                    app.logger.error(api_error)
+                    print(f"[ERROR] Google Sheets API error: {error_msg}")
+            else:
+                app.logger.error(f'Error creating Google Sheet for order #{order.id}: {error_msg}', exc_info=True)
+                print(f"[ERROR] Error creating Google Sheet: {error_msg}")
+        else:
+            # Fallback for when gspread exceptions aren't available
+            if '403' in error_msg or 'quota' in error_msg.lower() or 'storage' in error_msg.lower():
+                quota_error = 'Google Drive storage quota exceeded for order #{}. Please free up space in Google Drive or upgrade storage plan.'.format(order.id)
+                app.logger.error(quota_error)
+                print(f"[ERROR] Google Drive storage quota exceeded. Cannot create sheet for order #{order.id}")
+            else:
+                app.logger.error(f'Error creating Google Sheet for order #{order.id}: {error_msg}', exc_info=True)
+                print(f"[ERROR] Error creating Google Sheet: {error_msg}")
         return None
 
 # Create tables
@@ -593,9 +770,13 @@ def place_order():
         # Create dedicated Google Sheet for this order (if configured)
         sheet_url = None
         if app.config.get('GOOGLE_SERVICE_ACCOUNT_JSON') or app.config.get('GOOGLE_SERVICE_ACCOUNT_FILE'):
-            sheet_url = create_order_spreadsheet(order)
-            if sheet_url:
-                order.sheet_url = sheet_url
+            try:
+                sheet_url = create_order_spreadsheet(order, ba_username=session.get('username', 'Unknown BA'))
+                if sheet_url:
+                    order.sheet_url = sheet_url
+            except Exception as sheet_error:
+                app.logger.error(f'Error creating Google Sheet (order will still be saved): {str(sheet_error)}', exc_info=True)
+                # Continue even if sheet creation fails - order should still be saved
         
         db.session.commit()
         
@@ -970,9 +1151,161 @@ def save_whatsapp_settings():
             'message': 'Settings saved but test message failed. Check the console/terminal for error details.'
         })
 
+@app.route('/admin/google/authorize', methods=['GET'])
+def google_authorize():
+    """Start OAuth flow for Google Drive/Sheets access."""
+    if 'user_id' not in session or session.get('role') != 'admin':
+        return redirect(url_for('login'))
+    
+    if not Flow:
+        flash('OAuth libraries not installed. Install google-auth-oauthlib.', 'error')
+        return redirect(url_for('admin_dashboard'))
+    
+    client_id = app.config.get('GOOGLE_OAUTH_CLIENT_ID')
+    client_secret = app.config.get('GOOGLE_OAUTH_CLIENT_SECRET')
+    redirect_uri = app.config.get('GOOGLE_OAUTH_REDIRECT_URI')
+    
+    if not client_id or not client_secret:
+        flash('Google OAuth not configured. Set GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET.', 'error')
+        return redirect(url_for('admin_dashboard'))
+    
+    try:
+        flow = Flow.from_client_config(
+            {
+                "web": {
+                    "client_id": client_id,
+                    "client_secret": client_secret,
+                    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                    "token_uri": "https://oauth2.googleapis.com/token",
+                    "redirect_uris": [redirect_uri]
+                }
+            },
+            scopes=GOOGLE_SCOPES
+        )
+        flow.redirect_uri = redirect_uri
+        
+        authorization_url, state = flow.authorization_url(
+            access_type='offline',
+            include_granted_scopes='true',
+            prompt='consent'  # Force consent to get refresh token
+        )
+        
+        session['oauth_state'] = state
+        return redirect(authorization_url)
+    except Exception as e:
+        app.logger.error(f'Error starting OAuth flow: {str(e)}', exc_info=True)
+        flash(f'Error starting authorization: {str(e)}', 'error')
+        return redirect(url_for('admin_dashboard'))
+
+@app.route('/oauth2callback')
+def oauth2callback():
+    """Handle OAuth callback and save tokens."""
+    if 'user_id' not in session or session.get('role') != 'admin':
+        return redirect(url_for('login'))
+    
+    if not Flow:
+        flash('OAuth libraries not installed.', 'error')
+        return redirect(url_for('admin_dashboard'))
+    
+    state = session.get('oauth_state')
+    if not state or state != request.args.get('state'):
+        flash('Invalid OAuth state. Please try again.', 'error')
+        return redirect(url_for('admin_dashboard'))
+    
+    client_id = app.config.get('GOOGLE_OAUTH_CLIENT_ID')
+    client_secret = app.config.get('GOOGLE_OAUTH_CLIENT_SECRET')
+    redirect_uri = app.config.get('GOOGLE_OAUTH_REDIRECT_URI')
+    
+    try:
+        # Allow insecure transport for localhost (development only)
+        import os
+        os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+        
+        flow = Flow.from_client_config(
+            {
+                "web": {
+                    "client_id": client_id,
+                    "client_secret": client_secret,
+                    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                    "token_uri": "https://oauth2.googleapis.com/token",
+                    "redirect_uris": [redirect_uri]
+                }
+            },
+            scopes=GOOGLE_SCOPES,
+            state=state
+        )
+        flow.redirect_uri = redirect_uri
+        
+        authorization_response = request.url
+        flow.fetch_token(authorization_response=authorization_response)
+        
+        credentials = flow.credentials
+        
+        # Save token to database
+        token_data = {
+            'token': credentials.token,
+            'refresh_token': credentials.refresh_token,
+            'token_uri': credentials.token_uri,
+            'client_id': credentials.client_id,
+            'client_secret': credentials.client_secret,
+            'scopes': credentials.scopes
+        }
+        
+        # Delete old token if exists
+        GoogleOAuthToken.query.delete()
+        db.session.commit()
+        
+        # Save new token
+        oauth_token = GoogleOAuthToken(token_data=json.dumps(token_data))
+        db.session.add(oauth_token)
+        db.session.commit()
+        
+        # Clear cached credentials
+        if hasattr(app, '_google_credentials'):
+            delattr(app, '_google_credentials')
+        if hasattr(app, '_gspread_client'):
+            delattr(app, '_gspread_client')
+        
+        session.pop('oauth_state', None)
+        flash('Google OAuth authorization successful! You can now create Google Sheets.', 'success')
+        app.logger.info('Google OAuth token saved successfully.')
+    except Exception as e:
+        app.logger.error(f'Error in OAuth callback: {str(e)}', exc_info=True)
+        flash(f'Authorization failed: {str(e)}', 'error')
+    
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/google/status', methods=['GET'])
+def google_oauth_status():
+    """Check OAuth authorization status."""
+    if 'user_id' not in session or session.get('role') != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    oauth_token = GoogleOAuthToken.query.first()
+    has_oauth = oauth_token is not None
+    
+    has_service_account = bool(
+        app.config.get('GOOGLE_SERVICE_ACCOUNT_FILE') or 
+        app.config.get('GOOGLE_SERVICE_ACCOUNT_JSON')
+    )
+    
+    has_oauth_config = bool(
+        app.config.get('GOOGLE_OAUTH_CLIENT_ID') and 
+        app.config.get('GOOGLE_OAUTH_CLIENT_SECRET')
+    )
+    
+    return jsonify({
+        'oauth_authorized': has_oauth,
+        'service_account_configured': has_service_account,
+        'oauth_configured': has_oauth_config,
+        'using_oauth': has_oauth  # OAuth takes precedence
+    })
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     # Render sets PORT automatically, use it
-    app.run(debug=False, host='0.0.0.0', port=port)
+    # Enable debug mode locally for better error messages
+    debug_mode = os.environ.get('FLASK_DEBUG', 'True').lower() == 'true'
+    app.run(debug=debug_mode, host='0.0.0.0', port=port)
 
 

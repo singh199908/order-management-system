@@ -30,6 +30,12 @@ GOOGLE_SERVICE_ACCOUNT_JSON=
 # Optional: Google Drive folder ID where new spreadsheets should be created
 GOOGLE_DRIVE_FOLDER_ID=
 
+# Google OAuth Configuration (Recommended - uses your personal storage quota)
+# Get these from Google Cloud Console > APIs & Services > Credentials > OAuth 2.0 Client ID
+GOOGLE_OAUTH_CLIENT_ID=
+GOOGLE_OAUTH_CLIENT_SECRET=
+GOOGLE_OAUTH_REDIRECT_URI=http://localhost:5000/oauth2callback
+
 # Server Port (auto-set by Render, don't change)
 PORT=5000
 

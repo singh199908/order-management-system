@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Place Order - Order Management System</title>
+    <title>Home - Order Management System</title>
     <style>
         * {
             margin: 0;
@@ -19,33 +19,44 @@
         
         .header {
             background: white;
-            padding: 20px;
+            padding: 15px 25px;
             border-radius: 8px;
             margin-bottom: 20px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: nowrap;
         }
         
-        .header-nav {
+        .top-nav {
             display: flex;
-            gap: 15px;
+            gap: 10px;
             align-items: center;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        
+        .top-nav span {
+            font-size: 14px;
+            color: #333;
         }
         
         h1 {
             color: #333;
         }
         
-        .user-info {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-        }
-        
         .btn {
-            padding: 10px 20px;
+            padding: 8px 18px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
@@ -218,6 +229,22 @@
         .btn-load:hover {
             background: #138496;
         }
+
+        .sticky-actions {
+            position: sticky;
+            bottom: 20px;
+            background: white;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+            z-index: 500;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
         
         .alert {
             padding: 15px;
@@ -257,29 +284,27 @@
             }
             
             .header {
-                flex-direction: column;
-                gap: 15px;
-                padding: 15px;
+                flex-direction: row;
+                gap: 8px;
+                padding: 12px 15px;
+                flex-wrap: nowrap;
+                overflow-x: auto;
             }
             
-            .header h1 {
-                font-size: 20px;
-                text-align: center;
+            .header-left {
+                gap: 8px;
             }
             
-            .header-nav {
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 10px;
+            .top-nav {
+                gap: 8px;
+                flex-wrap: nowrap;
             }
             
-            .header-nav .btn {
-                padding: 8px 15px;
+            .top-nav .btn,
+            .header-left .btn {
+                padding: 8px 12px;
                 font-size: 12px;
-            }
-            
-            .header-nav span {
-                font-size: 14px;
+                white-space: nowrap;
             }
             
             .container > div {
@@ -287,8 +312,8 @@
             }
             
             .order-summary {
-                position: relative;
-                top: 0;
+                position: static;
+                top: auto;
                 margin-top: 20px;
             }
             
@@ -323,6 +348,26 @@
                 padding: 12px;
                 font-size: 14px;
             }
+
+            .sticky-actions {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                border-radius: 12px 12px 0 0;
+                padding: 15px 20px;
+                margin: 0;
+                box-shadow: 0 -6px 16px rgba(0,0,0,0.15);
+                border-top: 1px solid #eee;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            body {
+                padding-bottom: 170px;
+            }
         }
         
         @media (max-width: 480px) {
@@ -338,13 +383,14 @@
                 font-size: 18px;
             }
             
-            .header-nav {
-                flex-direction: column;
+            .top-nav {
                 width: 100%;
+                justify-content: center;
             }
             
-            .header-nav .btn {
-                width: 100%;
+            .top-nav .btn {
+                flex: unset;
+                min-width: auto;
             }
             
             .product-card {
@@ -388,14 +434,13 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Place Your Order</h1>
-            <div class="user-info">
-                <div class="header-nav">
-                    <a href="{{ url_for('order_page') }}" class="btn" style="background: #667eea; color: white;">Place Order</a>
-                    <a href="{{ url_for('my_orders') }}" class="btn" style="background: #6c757d; color: white;">My Orders</a>
-                    <span>Welcome, <strong>{{ session.username }}</strong></span>
-                    <a href="{{ url_for('logout') }}" class="btn btn-logout">Logout</a>
-                </div>
+            <div class="header-left">
+                <a href="{{ url_for('order_page') }}" class="btn" style="background: #667eea; color: white;">Home</a>
+                <span style="font-size:14px; color:#333;">Welcome, <strong>{{ session.username }}</strong></span>
+            </div>
+            <div class="top-nav">
+                <a href="{{ url_for('my_orders') }}" class="btn" style="background: #6c757d; color: white;">My Orders</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-logout">Logout</a>
             </div>
         </div>
         
@@ -423,11 +468,13 @@
                 <div id="order-total" class="order-total" style="display: none;">
                     Total: ₹<span id="total-amount">0.00</span>
                 </div>
-                <div style="display: flex; gap: 10px; margin-top: 15px;">
-                    <button id="save-cart" class="btn-save" style="flex: 1;">Save Cart</button>
-                    <button id="load-cart" class="btn-load" style="flex: 1;">Load Saved Cart</button>
+                <div class="sticky-actions">
+                    <div class="action-buttons">
+                        <button id="save-cart" class="btn-save" style="flex: 1;">Save Cart</button>
+                        <button id="load-cart" class="btn-load" style="flex: 1;">Load Saved Cart</button>
+                    </div>
+                    <button id="submit-order" class="btn-submit" disabled>Place Order</button>
                 </div>
-                <button id="submit-order" class="btn-submit" disabled>Place Order</button>
             </div>
         </div>
     </div>
