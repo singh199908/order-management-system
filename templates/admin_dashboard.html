@@ -212,6 +212,23 @@
             margin-right: 5px;
         }
         
+        .btn-sheet {
+            padding: 5px 15px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            text-decoration: none;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        
+        .btn-sheet:hover {
+            background: #0069d9;
+        }
+        
         .btn-download:hover {
             background: #218838;
         }
@@ -773,6 +790,11 @@
                                     <td data-label="Status"><span class="status-badge status-${order.status}">${order.status}</span></td>
                                     <td data-label="Date">${order.created_at}</td>
                                     <td data-label="Actions">
+                                        ${order.sheet_url ? `
+                                            <a href="${order.sheet_url}" class="btn-sheet" target="_blank" rel="noopener noreferrer">
+                                                📄 Sheet
+                                            </a>
+                                        ` : ''}
                                         <a href="/admin/download_order/${order.id}" class="btn-download" onclick="handleDownload(${order.id}, event)">
                                             📥 Download
                                         </a>

@@ -68,8 +68,14 @@ This guide will help you deploy the Order Management System to Render.com.
    ADMIN_WHATSAPP_NUMBER=whatsapp:+1234567890
    TWILIO_CONTENT_SID=your_content_sid_here
    SECRET_KEY=<generate a random secret key>
-   PORT=10000
+    DATABASE_URL=<render-postgres-connection-string>
+    # Choose ONE of the following for Google credentials
+    GOOGLE_SERVICE_ACCOUNT_JSON=<paste-json-here>
+    # or
+    GOOGLE_SERVICE_ACCOUNT_FILE=service_account.json
+    GOOGLE_DRIVE_FOLDER_ID=<optional-folder-id>
    ```
+   > Render sets `PORT` automatically, so you don't need to define it manually.
 
 5. **Deploy:**
    - Click "Create Web Service"
@@ -96,7 +102,7 @@ This guide will help you deploy the Order Management System to Render.com.
 
 2. **Use Render PostgreSQL:**
    - Create a PostgreSQL database on Render
-   - Update `SQLALCHEMY_DATABASE_URI` in `app.py` to use the PostgreSQL connection string
+   - Copy the connection string into the `DATABASE_URL` environment variable (the app automatically detects it)
 
 3. **Set up custom domain:**
    - Add your domain in Render dashboard

@@ -83,11 +83,14 @@ If you encounter build issues:
 ## Environment Variables to Verify
 
 Make sure these are set in Render dashboard (Settings → Environment):
+- `SECRET_KEY`
+- `DATABASE_URL` (Render PostgreSQL connection string)
 - `TWILIO_ACCOUNT_SID`
 - `TWILIO_AUTH_TOKEN`
 - `TWILIO_WHATSAPP_FROM`
 - `ADMIN_WHATSAPP_NUMBER`
 - `TWILIO_CONTENT_SID`
-- `SECRET_KEY`
+- `GOOGLE_SERVICE_ACCOUNT_JSON` (or `GOOGLE_SERVICE_ACCOUNT_FILE`)
+- `GOOGLE_DRIVE_FOLDER_ID` (optional)
 
 

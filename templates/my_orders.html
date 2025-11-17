@@ -174,6 +174,21 @@
             align-items: center;
         }
         
+        .order-actions {
+            margin-top: 15px;
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .btn-view-sheet {
+            background: #007bff;
+            color: white;
+        }
+        
+        .btn-view-sheet:hover {
+            background: #0069d9;
+        }
+        
         .total-label {
             font-size: 18px;
             font-weight: 600;
@@ -265,6 +280,15 @@
             
             .total-amount {
                 font-size: 18px;
+            }
+
+            .order-actions {
+                justify-content: center;
+            }
+            
+            .order-actions .btn {
+                width: 100%;
+                text-align: center;
             }
         }
         
@@ -366,6 +390,14 @@
                             <span class="total-label">Total Amount:</span>
                             <span class="total-amount">₹{{ "%.2f"|format(order.total_amount) }}</span>
                         </div>
+
+                        {% if order.sheet_url %}
+                        <div class="order-actions">
+                            <a href="{{ order.sheet_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-view-sheet">
+                                View Google Sheet Backup
+                            </a>
+                        </div>
+                        {% endif %}
                     </div>
                 {% endfor %}
             {% else %}

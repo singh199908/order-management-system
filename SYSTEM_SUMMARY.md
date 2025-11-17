@@ -6,7 +6,7 @@ A complete web-based order management system for Business Associates (BAs) to pl
 ## Features Implemented
 
 ### 1. User Authentication
-- **Admin Login**: Default credentials (admin/admin123)
+- **Admin Login**: Default credentials (rtc / rtc1336)
 - **BA Login**: Created by admin through dashboard
 - **Session Management**: Secure session-based authentication
 - **Role-based Access**: Admin and BA have different permissions
@@ -84,6 +84,17 @@ A complete web-based order management system for Business Associates (BAs) to pl
   - Variable 3: Total Amount
   - Variable 4: Item Count
 
+### 6. Google Sheets Backups (Per Order)
+- **Automatic Sheet Creation**: Every order generates its own Google Sheet using a service account
+- **Drive Folder Support**: Sheets can be stored in a specific Drive folder (share with the service account)
+- **Sheet Layout**:
+  - Order metadata (ID, BA name, status, date)
+  - Line-item table with quantities, pricing, totals
+  - Grand total summary
+- **Access Links**:
+  - Admin dashboard shows a "Sheet" button for each order
+  - BA "My Orders" page shows a "View Google Sheet Backup" link when available
+
 ## Technical Stack
 
 ### Backend
@@ -93,6 +104,7 @@ A complete web-based order management system for Business Associates (BAs) to pl
 - **Pandas**: Excel file processing
 - **openpyxl**: Excel file generation
 - **Twilio/Requests**: WhatsApp notifications
+- **gspread + google-auth**: Google Sheets / Drive backups
 
 ### Frontend
 - **HTML/CSS/JavaScript**: No frameworks, vanilla JS
@@ -108,7 +120,7 @@ A complete web-based order management system for Business Associates (BAs) to pl
 - id, lot_type_code, parent_code, item_lot_type, quantity_available, mrp, created_at, updated_at
 
 ### Orders Table
-- id, user_id, order_data (JSON), total_amount, status, created_at
+- id, user_id, order_data (JSON), total_amount, status, sheet_url, created_at
 
 ### Notifications Table
 - id, order_id, message, read, created_at
@@ -151,11 +163,15 @@ order_management_system/
 
 ## Environment Variables (Optional)
 For production, set these environment variables:
+- `SECRET_KEY`
+- `DATABASE_URL` (Render PostgreSQL connection string)
 - `TWILIO_ACCOUNT_SID`
 - `TWILIO_AUTH_TOKEN`
 - `TWILIO_WHATSAPP_FROM`
 - `ADMIN_WHATSAPP_NUMBER`
 - `TWILIO_CONTENT_SID`
+- `GOOGLE_SERVICE_ACCOUNT_FILE` or `GOOGLE_SERVICE_ACCOUNT_JSON`
+- `GOOGLE_DRIVE_FOLDER_ID` (optional, for organizing sheets)
 
 ## Security Notes
 - Change default admin password in production

@@ -47,12 +47,23 @@ This document lists all environment variables that need to be set in your Render
 - **Default**: Render automatically sets this
 - **Note**: You don't need to set this manually - Render handles it
 
-### 8. **SQLALCHEMY_DATABASE_URI** (Optional - for PostgreSQL)
-- **Purpose**: Database connection string
-- **Default**: Uses SQLite (`sqlite:///orders.db`)
-- **For Production**: Use Render PostgreSQL database
+### 8. **DATABASE_URL** (Recommended - for PostgreSQL)
+- **Purpose**: Database connection string used by SQLAlchemy
+- **Default**: Falls back to local SQLite (`sqlite:///orders.db`) when not set
+- **For Production**: Point this to your Render PostgreSQL database so data survives deploys
 - **Example**: `postgresql://user:pass@host:5432/dbname`
-- **Note**: Only needed if you want persistent database (recommended for production)
+- **Note**: Strongly recommended in production
+
+### 9. **GOOGLE_SERVICE_ACCOUNT_FILE** or **GOOGLE_SERVICE_ACCOUNT_JSON** (Optional but required for Google Sheets backups)
+- **Purpose**: Credentials for the Google service account that can create spreadsheets in your Drive
+- **How to use**:
+  - **GOOGLE_SERVICE_ACCOUNT_FILE**: path to the JSON file on disk (e.g., `service_account.json`)
+  - **GOOGLE_SERVICE_ACCOUNT_JSON**: paste the full JSON content directly into an env var (useful on Render)
+- **Note**: Set at least one of these for per-order Google Sheet backups to work
+
+### 10. **GOOGLE_DRIVE_FOLDER_ID** (Optional)
+- **Purpose**: Drive folder ID where new per-order spreadsheets should be stored
+- **Note**: Leave blank to create sheets at the root of the service account drive. Share the folder with the service account if you set this.
 
 ## How to Set Environment Variables on Render
 
@@ -89,6 +100,9 @@ TWILIO_ACCOUNT_SID=<your-account-sid>
 TWILIO_AUTH_TOKEN=<your-auth-token>
 TWILIO_WHATSAPP_FROM=whatsapp:+14155238886
 ADMIN_WHATSAPP_NUMBER=whatsapp:+1234567890
+DATABASE_URL=<postgres-connection-string>
+GOOGLE_SERVICE_ACCOUNT_JSON=<full-json-or-leave-empty-if-using-file>
+GOOGLE_DRIVE_FOLDER_ID=<optional-folder-id>
 ```
 
 ## Security Best Practices

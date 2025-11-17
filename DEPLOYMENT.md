@@ -25,6 +25,12 @@
    ADMIN_WHATSAPP_NUMBER=whatsapp:+916392104804
    TWILIO_CONTENT_SID=HXb5b62575e6e4ff6129ad7c8efe1f983e
    SECRET_KEY=your-secret-key-here
+   DATABASE_URL=<render-postgres-connection-string>
+   # Choose one of the following for Google credentials
+   GOOGLE_SERVICE_ACCOUNT_JSON=<paste-json-here>
+   # or
+   GOOGLE_SERVICE_ACCOUNT_FILE=service_account.json
+   GOOGLE_DRIVE_FOLDER_ID=<optional-folder-id>
    ```
 
 5. **Deploy**: Click "Create Web Service"
@@ -157,7 +163,7 @@ If you want to host on your local network:
 ### Database Considerations:
 - SQLite works for small to medium deployments
 - For larger scale, consider PostgreSQL (Render/Railway support this)
-- Update `SQLALCHEMY_DATABASE_URI` if using PostgreSQL
+- Set the `DATABASE_URL` environment variable to your managed database connection string
 
 ### WhatsApp Configuration:
 - Make sure Twilio credentials are set as environment variables

@@ -18,6 +18,18 @@ ADMIN_WHATSAPP_NUMBER=whatsapp:+your-phone-number-here
 # Twilio Content Template SID (optional - not currently used in the app)
 TWILIO_CONTENT_SID=your-content-sid-here
 
+# Database (set on Render when using managed Postgres/MySQL)
+DATABASE_URL=
+
+# Google Service Account for per-order backups (choose ONE of the two options)
+# 1) Path to JSON key on disk (keep file out of git)
+GOOGLE_SERVICE_ACCOUNT_FILE=service_account.json
+# 2) Inline JSON content (useful for Render environment variables)
+GOOGLE_SERVICE_ACCOUNT_JSON=
+
+# Optional: Google Drive folder ID where new spreadsheets should be created
+GOOGLE_DRIVE_FOLDER_ID=
+
 # Server Port (auto-set by Render, don't change)
 PORT=5000
 

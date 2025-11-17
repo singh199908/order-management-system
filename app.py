@@ -8,7 +8,14 @@ import os
 import json
 import sys
 from io import BytesIO
-from twilio.rest import Client
+from sqlalchemy import inspect, text
+
+try:
+    import gspread
+    from google.oauth2 import service_account
+except ImportError:
+    gspread = None
+    service_account = None
 
 # Fix Windows console encoding for print statements
 if sys.platform == 'win32':
@@ -19,7 +26,11 @@ if sys.platform == 'win32':
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key-change-this-in-production')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///orders.db'
+database_url = os.environ.get('DATABASE_URL')
+if database_url:
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///orders.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
@@ -36,6 +47,9 @@ app.config['TWILIO_AUTH_TOKEN'] = os.environ.get('TWILIO_AUTH_TOKEN', '')
 app.config['TWILIO_WHATSAPP_FROM'] = os.environ.get('TWILIO_WHATSAPP_FROM', 'whatsapp:+14155238886')
 app.config['ADMIN_WHATSAPP_NUMBER'] = os.environ.get('ADMIN_WHATSAPP_NUMBER', '')
 app.config['TWILIO_CONTENT_SID'] = os.environ.get('TWILIO_CONTENT_SID', '')
+app.config['GOOGLE_SERVICE_ACCOUNT_FILE'] = os.environ.get('GOOGLE_SERVICE_ACCOUNT_FILE', '')
+app.config['GOOGLE_SERVICE_ACCOUNT_JSON'] = os.environ.get('GOOGLE_SERVICE_ACCOUNT_JSON', '')
+app.config['GOOGLE_DRIVE_FOLDER_ID'] = os.environ.get('GOOGLE_DRIVE_FOLDER_ID', '')
 
 
 # Create upload folder if it doesn't exist
@@ -67,6 +81,7 @@ class Order(db.Model):
     order_data = db.Column(db.Text, nullable=False)  # JSON string of order items
     total_amount = db.Column(db.Float, nullable=False)
     status = db.Column(db.String(20), default='pending')  # pending, downloaded, confirmed, completed
+    sheet_url = db.Column(db.String(500))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user = db.relationship('User', backref=db.backref('orders', lazy=True))
 
@@ -88,14 +103,138 @@ class SavedCart(db.Model):
     
     user = db.relationship('User', backref=db.backref('saved_carts', lazy=True))
 
+GOOGLE_SCOPES = [
+    'https://www.googleapis.com/auth/spreadsheets',
+    'https://www.googleapis.com/auth/drive'
+]
+
+
+def get_google_credentials():
+    """Return cached Google service account credentials if configured."""
+    if not service_account:
+        app.logger.warning('google-auth is not installed. Skipping Google Sheets backup.')
+        return None
+    
+    cached_credentials = getattr(app, '_google_credentials', None)
+    if cached_credentials:
+        return cached_credentials
+    
+    credentials_json = app.config.get('GOOGLE_SERVICE_ACCOUNT_JSON')
+    credentials_file = app.config.get('GOOGLE_SERVICE_ACCOUNT_FILE')
+    
+    try:
+        if credentials_json:
+            info = json.loads(credentials_json)
+            credentials = service_account.Credentials.from_service_account_info(info, scopes=GOOGLE_SCOPES)
+        elif credentials_file and os.path.exists(credentials_file):
+            credentials = service_account.Credentials.from_service_account_file(credentials_file, scopes=GOOGLE_SCOPES)
+        else:
+            app.logger.warning('Google service account not configured. Set GOOGLE_SERVICE_ACCOUNT_FILE or GOOGLE_SERVICE_ACCOUNT_JSON to enable backups.')
+            return None
+        
+        app._google_credentials = credentials
+        return credentials
+    except Exception as e:
+        app.logger.error(f'Error loading Google credentials: {str(e)}', exc_info=True)
+        return None
+
+
+def get_gspread_client():
+    """Initialize and cache a gspread client."""
+    if not gspread:
+        app.logger.warning('gspread is not installed. Skipping Google Sheets backup.')
+        return None
+    
+    cached_client = getattr(app, '_gspread_client', None)
+    if cached_client:
+        return cached_client
+    
+    credentials = get_google_credentials()
+    if not credentials:
+        return None
+    
+    try:
+        client = gspread.authorize(credentials)
+        app._gspread_client = client
+        return client
+    except Exception as e:
+        app.logger.error(f'Error creating gspread client: {str(e)}', exc_info=True)
+        return None
+
+
+def create_order_spreadsheet(order):
+    """Create a dedicated Google Sheet for the given order and return its URL."""
+    client = get_gspread_client()
+    if not client:
+        return None
+    
+    ba_username = order.user.username if order.user else 'Unknown BA'
+    order_date = order.created_at.strftime('%Y-%m-%d %H:%M:%S') if order.created_at else datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+    sheet_title = f'Order #{order.id} - {ba_username} - {order.created_at.strftime("%Y-%m-%d") if order.created_at else datetime.utcnow().strftime("%Y-%m-%d")}'
+    
+    try:
+        folder_id = app.config.get('GOOGLE_DRIVE_FOLDER_ID') or None
+        spreadsheet = client.create(sheet_title, folder_id=folder_id)
+        worksheet = spreadsheet.sheet1
+        
+        metadata_rows = [
+            ['Order ID', order.id],
+            ['BA Username', ba_username],
+            ['Order Date', order_date],
+            ['Status', order.status or 'pending'],
+            ['']
+        ]
+        worksheet.update('A1', metadata_rows)
+        
+        header_row_index = len(metadata_rows) + 1
+        headers = ['#', 'Lot Type Code', 'Item Type', 'Parent Code', 'Quantity Needed', 'MRP', 'Line Total (₹)']
+        worksheet.update(f'A{header_row_index}', [headers])
+        
+        try:
+            order_items = json.loads(order.order_data or '[]')
+        except Exception:
+            order_items = []
+        
+        if order_items:
+            item_rows = []
+            for idx, item in enumerate(order_items, start=1):
+                item_rows.append([
+                    idx,
+                    item.get('lot_type_code') or '',
+                    item.get('item_lot_type') or '',
+                    item.get('parent_code') or '',
+                    item.get('quantity') or 0,
+                    item.get('mrp') or 0,
+                    item.get('total') or 0
+                ])
+            worksheet.update(f'A{header_row_index + 1}', item_rows)
+        
+        summary_row_index = header_row_index + len(order_items) + 2
+        worksheet.update(
+            f'A{summary_row_index}',
+            [['Total Amount (₹)', round(order.total_amount or 0, 2)]]
+        )
+        
+        app.logger.info(f'Created Google Sheet for order #{order.id}: {spreadsheet.url}')
+        return spreadsheet.url
+    
+    except Exception as e:
+        app.logger.error(f'Error creating Google Sheet for order #{order.id}: {str(e)}', exc_info=True)
+        return None
+
 # Create tables
 with app.app_context():
     db.create_all()
-    
-    # Delete all existing BA users
-    ba_users = User.query.filter_by(role='ba').all()
-    for ba_user in ba_users:
-        db.session.delete(ba_user)
+
+    # Ensure legacy databases have the sheet_url column
+    try:
+        inspector = inspect(db.engine)
+        order_columns = [col['name'] for col in inspector.get_columns('order')]
+        if 'sheet_url' not in order_columns:
+            with db.engine.connect() as connection:
+                connection.execute(text('ALTER TABLE "order" ADD COLUMN sheet_url VARCHAR(500)'))
+    except Exception as e:
+        app.logger.warning(f'Could not verify/add sheet_url column: {str(e)}')
     
     # Create/update default admin user
     admin = User.query.filter_by(username='rtc').first()
@@ -104,11 +243,6 @@ with app.app_context():
         admin.password_hash = generate_password_hash('rtc1336')
         admin.role = 'admin'
     else:
-        # Delete old admin user if exists
-        old_admin = User.query.filter_by(username='admin').first()
-        if old_admin:
-            db.session.delete(old_admin)
-        
         # Create new admin user
         admin = User(
             username='rtc',
@@ -455,6 +589,13 @@ def place_order():
             message=f"New order #{order.id} received from {session['username']} - Total: ₹{total_amount:.2f}"
         )
         db.session.add(notification)
+
+        # Create dedicated Google Sheet for this order (if configured)
+        sheet_url = None
+        if app.config.get('GOOGLE_SERVICE_ACCOUNT_JSON') or app.config.get('GOOGLE_SERVICE_ACCOUNT_FILE'):
+            sheet_url = create_order_spreadsheet(order)
+            if sheet_url:
+                order.sheet_url = sheet_url
         
         db.session.commit()
         
@@ -608,6 +749,7 @@ def admin_orders():
         'order_data': json.loads(order.order_data),
         'total_amount': order.total_amount,
         'status': order.status,
+        'sheet_url': order.sheet_url,
         'created_at': order.created_at.strftime('%Y-%m-%d %H:%M:%S')
     } for order in orders])
 
