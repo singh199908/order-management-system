@@ -17,38 +17,123 @@
             padding: 20px;
         }
         
-        .header {
-            background: white;
-            padding: 15px 25px;
+        .header-wrapper {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
             position: sticky;
             top: 0;
-            z-index: 1000;
+            left: 0;
+            right: 0;
+            width: 100%;
+            z-index: 1200;
+            margin-bottom: 15px;
+            overflow: hidden;
         }
 
-        .header-left {
+        .header-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            pointer-events: none;
+        }
+        
+        .header {
+            background: transparent;
+            padding: 6px 16px;
+            border-radius: 0;
+            margin-bottom: 0;
+            box-shadow: none;
             display: flex;
             align-items: center;
-            gap: 12px;
+            justify-content: space-between;
+            position: relative;
+            z-index: 1;
+            min-height: 44px;
+            gap: 0;
             flex-wrap: nowrap;
+        }
+
+        .header-left,
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: nowrap;
+            flex: 0 0 auto;
+            margin: 0;
+            padding: 0;
+            min-width: 0;
+        }
+
+        .header-right {
+            margin-left: auto;
+        }
+
+        .header-left .btn,
+        .header-right .btn {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            font-weight: 600;
+            padding: 5px 14px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            font-size: 13px;
+            white-space: nowrap;
+            margin: 0;
+            flex-shrink: 0;
+        }
+
+        .header-left .btn:hover,
+        .header-right .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
         }
         
         .top-nav {
             display: flex;
-            gap: 10px;
+            flex-direction: row;
+            gap: 16px;
             align-items: center;
-            flex-wrap: wrap;
-            justify-content: flex-end;
+            flex-wrap: nowrap;
+            flex-shrink: 0;
         }
-        
-        .top-nav span {
-            font-size: 14px;
-            color: #333;
+
+        .welcome-section {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+            margin: 0;
+            padding: 0;
+            flex-shrink: 0;
+        }
+
+        .welcome-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 400;
+        }
+
+        .welcome-name {
+            font-size: 12px;
+            color: white;
+            font-weight: 700;
+        }
+
+        .header-right .btn-logout {
+            background: rgba(220, 53, 69, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .header-right .btn-logout:hover {
+            background: rgba(220, 53, 69, 0.95);
         }
         
         h1 {
@@ -63,21 +148,19 @@
             font-size: 14px;
             text-decoration: none;
             display: inline-block;
-            transition: all 0.3s;
-        }
-        
-        .btn-logout {
-            background: #dc3545;
-            color: white;
-        }
-        
-        .btn-logout:hover {
-            background: #c82333;
+            transition: all 0.3s ease;
         }
         
         .container {
             max-width: 1200px;
             margin: 0 auto;
+        }
+        
+        .main-content-grid {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+            align-items: start;
         }
         
         .products-grid {
@@ -146,8 +229,6 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 20px;
         }
         
         .order-summary h2 {
@@ -180,16 +261,16 @@
         }
         
         .btn-submit {
-            width: 100%;
-            padding: 15px;
+            width: auto;
+            padding: 8px 20px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
             border-radius: 5px;
-            font-size: 16px;
+            font-size: 13px;
             font-weight: 600;
             cursor: pointer;
-            margin-top: 20px;
+            margin-top: 0;
             transition: transform 0.2s;
         }
         
@@ -231,38 +312,128 @@
         }
 
         .sticky-actions {
-            position: sticky;
-            bottom: 20px;
-            background: white;
-            padding-top: 15px;
-            border-top: 1px solid #eee;
-            box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
-            z-index: 500;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 12px 24px;
+            border-radius: 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            margin-top: 0;
+            margin-bottom: 0;
+            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            min-height: 52px;
+            position: relative;
         }
 
         .action-buttons {
+            display: inline-flex;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            align-items: stretch;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+        }
+
+        .action-buttons button {
+            flex: 0 0 auto;
+            border-radius: 0;
+            padding: 8px 16px;
+            font-size: 12px;
+            white-space: nowrap;
             display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .action-buttons button:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .action-buttons button:first-child {
+            border-top-left-radius: 6px;
+            border-bottom-left-radius: 6px;
+        }
+
+        .action-buttons button:last-child {
+            border-top-right-radius: 6px;
+            border-bottom-right-radius: 6px;
+        }
+
+        .action-buttons button + button {
+            border-left: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-submit {
+            padding: 8px 20px;
+            font-size: 13px;
+            white-space: nowrap;
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: auto;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .btn-submit:disabled {
+            background: rgba(255, 255, 255, 0.1);
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        #alert-container {
+            margin: 0;
+            padding: 0 24px;
+            min-height: 0;
+            position: relative;
+            z-index: 1;
+        }
+        
+        #alert-container:empty {
+            display: none;
         }
         
         .alert {
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 0;
+            margin-top: 0;
             text-align: center;
+            backdrop-filter: blur(10px);
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
         
         .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+            background-color: rgba(40, 167, 69, 0.9);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
         
         .alert-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+            background-color: rgba(220, 53, 69, 0.9);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
         
         .empty-cart {
@@ -281,33 +452,45 @@
         @media (max-width: 768px) {
             body {
                 padding: 10px;
+                padding-top: 170px; /* Adjust based on sticky-actions height */
             }
             
+            .header-wrapper {
+                border-radius: 0;
+                margin-bottom: 15px;
+            }
+
             .header {
-                flex-direction: row;
-                gap: 8px;
-                padding: 12px 15px;
-                flex-wrap: nowrap;
-                overflow-x: auto;
-            }
-            
-            .header-left {
-                gap: 8px;
-            }
-            
-            .top-nav {
-                gap: 8px;
+                gap: 6px;
+                padding: 6px 10px;
                 flex-wrap: nowrap;
             }
             
-            .top-nav .btn,
-            .header-left .btn {
-                padding: 8px 12px;
-                font-size: 12px;
-                white-space: nowrap;
+            .header-left,
+            .header-right {
+                flex-wrap: nowrap;
+                width: auto;
             }
             
-            .container > div {
+            .header-left .btn,
+            .header-right .btn {
+                padding: 4px 10px;
+                font-size: 11px;
+            }
+
+            .welcome-section {
+                gap: 3px;
+            }
+
+            .welcome-label {
+                font-size: 11px;
+            }
+
+            .welcome-name {
+                font-size: 11px;
+            }
+            
+            .main-content-grid {
                 grid-template-columns: 1fr !important;
             }
             
@@ -349,24 +532,40 @@
                 font-size: 14px;
             }
 
+            .header-wrapper {
+                margin-bottom: 20px;
+            }
+            
+            #alert-container {
+                padding: 0 15px;
+            }
+
             .sticky-actions {
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                border-radius: 12px 12px 0 0;
-                padding: 15px 20px;
-                margin: 0;
-                box-shadow: 0 -6px 16px rgba(0,0,0,0.15);
-                border-top: 1px solid #eee;
+                padding: 10px 14px;
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch;
+                min-height: auto;
             }
 
             .action-buttons {
-                flex-direction: column;
+                width: 100%;
+                flex-direction: row;
             }
 
-            body {
-                padding-bottom: 170px;
+            .btn-submit {
+                width: 100%;
+            }
+
+            .action-buttons button {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+            
+            .btn-submit {
+                width: auto;
+                margin-top: 0;
+                flex: 0 0 auto;
             }
         }
         
@@ -417,7 +616,7 @@
         
         /* Tablet Styles */
         @media (min-width: 769px) and (max-width: 1024px) {
-            .container > div {
+            .main-content-grid {
                 grid-template-columns: 1fr 300px;
             }
             
@@ -429,24 +628,85 @@
                 padding: 15px;
             }
         }
+
+        /* Ensure proper alignment for all buttons */
+        .btn, .btn-save, .btn-load, .btn-submit, .btn-logout {
+            vertical-align: middle;
+            line-height: 1.5;
+        }
+
+        /* Fix header alignment on all screen sizes */
+        @media (max-width: 768px) {
+            .header-wrapper {
+                border-radius: 0;
+                margin-bottom: 15px;
+            }
+
+            .header {
+                gap: 8px;
+                padding: 8px 12px;
+                flex-wrap: nowrap;
+            }
+
+            .header-left,
+            .header-right {
+                flex-wrap: nowrap;
+            }
+
+            .header-left .btn,
+            .header-right .btn {
+                max-width: 100%;
+            }
+
+            .welcome-section {
+                align-items: center;
+            }
+
+            .sticky-actions {
+                padding: 10px 14px;
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch;
+                min-height: auto;
+            }
+
+            .action-buttons {
+                width: 100%;
+            }
+
+            .btn-submit {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <div class="header-left">
-                <a href="{{ url_for('order_page') }}" class="btn" style="background: #667eea; color: white;">Home</a>
-                <span style="font-size:14px; color:#333;">Welcome, <strong>{{ session.username }}</strong></span>
+        <div class="header-wrapper">
+            <div class="header">
+                <div class="header-left">
+                    <a href="{{ url_for('order_page') }}" class="btn">Home</a>
+                    <div class="welcome-section">
+                        <span class="welcome-label">Welcome,</span>
+                        <span class="welcome-name">{{ session.username }}</span>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <a href="{{ url_for('my_orders') }}" class="btn">Order History</a>
+                    <a href="{{ url_for('logout') }}" class="btn btn-logout">Logout</a>
+                </div>
             </div>
-            <div class="top-nav">
-                <a href="{{ url_for('my_orders') }}" class="btn" style="background: #6c757d; color: white;">My Orders</a>
-                <a href="{{ url_for('logout') }}" class="btn btn-logout">Logout</a>
+            <div id="alert-container"></div>
+            <div class="sticky-actions">
+            <div class="action-buttons">
+                <button id="save-cart" class="btn-save" style="flex: 1;">Save Cart</button>
+                <button id="load-cart" class="btn-load" style="flex: 1;">Load Saved Cart</button>
+            </div>
+            <button id="submit-order" class="btn-submit" disabled>Place Order</button>
             </div>
         </div>
         
-        <div id="alert-container"></div>
-        
-        <div style="display: grid; grid-template-columns: 1fr 350px; gap: 20px;" class="main-content-grid">
+        <div class="main-content-grid">
             <div>
                 <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;">
                     <input type="text" 
@@ -467,13 +727,6 @@
                 </div>
                 <div id="order-total" class="order-total" style="display: none;">
                     Total: ₹<span id="total-amount">0.00</span>
-                </div>
-                <div class="sticky-actions">
-                    <div class="action-buttons">
-                        <button id="save-cart" class="btn-save" style="flex: 1;">Save Cart</button>
-                        <button id="load-cart" class="btn-load" style="flex: 1;">Load Saved Cart</button>
-                    </div>
-                    <button id="submit-order" class="btn-submit" disabled>Place Order</button>
                 </div>
             </div>
         </div>

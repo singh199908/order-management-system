@@ -32,7 +32,13 @@
             color: #333;
         }
         
-        .user-info {
+        .header-left {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .header-right {
             display: flex;
             gap: 20px;
             align-items: center;
@@ -405,18 +411,15 @@
                 padding: 15px;
             }
             
-            .header h1 {
-                font-size: 20px;
-                text-align: center;
-            }
-            
-            .user-info {
+            .header-left,
+            .header-right {
                 flex-direction: column;
                 width: 100%;
                 gap: 10px;
             }
             
-            .user-info .btn {
+            .header-left .btn,
+            .header-right .btn {
                 width: 100%;
             }
             
@@ -559,9 +562,12 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Admin Dashboard</h1>
-            <div class="user-info">
+            <div class="header-left">
+                <a href="{{ url_for('order_page') }}" class="btn" style="background: #667eea; color: white;">Home</a>
                 <span>Welcome, <strong>{{ session.username }}</strong></span>
+            </div>
+            <div class="header-right">
+                <a href="{{ url_for('my_orders') }}" class="btn" style="background: #6c757d; color: white;">Order History</a>
                 <a href="{{ url_for('logout') }}" class="btn btn-logout">Logout</a>
             </div>
         </div>

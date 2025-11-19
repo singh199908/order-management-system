@@ -28,7 +28,13 @@
             align-items: center;
         }
         
-        .header-nav {
+        .header-left {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .header-right {
             display: flex;
             gap: 15px;
             align-items: center;
@@ -224,19 +230,16 @@
                 padding: 15px;
             }
             
-            .header h1 {
-                font-size: 20px;
-                text-align: center;
-            }
-            
-            .header-nav {
+            .header-left,
+            .header-right {
                 flex-wrap: wrap;
                 justify-content: center;
                 gap: 10px;
                 width: 100%;
             }
             
-            .header-nav .btn {
+            .header-left .btn,
+            .header-right .btn {
                 padding: 8px 15px;
                 font-size: 12px;
             }
@@ -305,11 +308,14 @@
                 font-size: 18px;
             }
             
-            .header-nav {
+            .header-left,
+            .header-right {
                 flex-direction: column;
+                width: 100%;
             }
             
-            .header-nav .btn {
+            .header-left .btn,
+            .header-right .btn {
                 width: 100%;
             }
             
@@ -349,11 +355,12 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>My Orders</h1>
-            <div class="header-nav">
-                <a href="{{ url_for('order_page') }}" class="btn" style="background: #667eea; color: white;">Place Order</a>
-                <a href="{{ url_for('my_orders') }}" class="btn" style="background: #6c757d; color: white;">My Orders</a>
+            <div class="header-left">
+                <a href="{{ url_for('order_page') }}" class="btn" style="background: #667eea; color: white;">Home</a>
                 <span>Welcome, <strong>{{ session.username }}</strong></span>
+            </div>
+            <div class="header-right">
+                <a href="{{ url_for('my_orders') }}" class="btn" style="background: #6c757d; color: white;">Order History</a>
                 <a href="{{ url_for('logout') }}" class="btn btn-logout">Logout</a>
             </div>
         </div>
