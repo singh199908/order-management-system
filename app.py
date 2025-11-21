@@ -968,6 +968,24 @@ def upload_stock():
     
     return jsonify({'error': 'Invalid file format. Please upload Excel file (.xlsx or .xls)'}), 400
 
+
+@app.route('/admin/delete_stock', methods=['DELETE'])
+def delete_stock():
+    if 'user_id' not in session or session.get('role') != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    try:
+        deleted_rows = Product.query.delete()
+        db.session.commit()
+        return jsonify({
+            'success': True,
+            'message': f'Stock cleared. Removed {deleted_rows} products.'
+        })
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f'Error deleting stock: {str(e)}', exc_info=True)
+        return jsonify({'error': 'Error deleting stock. Please try again.'}), 500
+
 @app.route('/admin/orders')
 def admin_orders():
     if 'user_id' not in session or session.get('role') != 'admin':

@@ -262,16 +262,17 @@
         
         .btn-submit {
             width: auto;
-            padding: 8px 20px;
+            padding: 6px 16px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 5px;
-            font-size: 13px;
+            border-radius: 6px;
+            font-size: 12px;
             font-weight: 600;
             cursor: pointer;
             margin-top: 0;
             transition: transform 0.2s;
+            min-height: 34px;
         }
         
         .btn-submit:hover {
@@ -326,6 +327,7 @@
             gap: 15px;
             min-height: 52px;
             position: relative;
+            flex-wrap: wrap;
         }
 
         .action-buttons {
@@ -371,10 +373,23 @@
         .action-buttons button + button {
             border-left: 1px solid rgba(255, 255, 255, 0.2);
         }
+
+        .cart-total-inline {
+            color: #fff;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .cart-total-inline strong {
+            font-size: 14px;
+        }
         
         .btn-submit {
-            padding: 8px 20px;
-            font-size: 13px;
+            padding: 6px 16px;
+            font-size: 12px;
             white-space: nowrap;
             flex: 0 0 auto;
             display: flex;
@@ -386,7 +401,7 @@
             border: 1px solid rgba(255, 255, 255, 0.3);
             color: white;
             font-weight: 600;
-            border-radius: 8px;
+            border-radius: 6px;
             transition: all 0.2s ease;
         }
 
@@ -528,8 +543,8 @@
             }
             
             .btn-submit, .btn-save, .btn-load {
-                padding: 12px;
-                font-size: 14px;
+                padding: 10px;
+                font-size: 13px;
             }
 
             .header-wrapper {
@@ -555,6 +570,11 @@
 
             .btn-submit {
                 width: 100%;
+            }
+
+            .cart-total-inline {
+                width: 100%;
+                justify-content: center;
             }
 
             .action-buttons button {
@@ -698,11 +718,15 @@
             </div>
             <div id="alert-container"></div>
             <div class="sticky-actions">
-            <div class="action-buttons">
-                <button id="save-cart" class="btn-save" style="flex: 1;">Save Cart</button>
-                <button id="load-cart" class="btn-load" style="flex: 1;">Load Saved Cart</button>
-            </div>
-            <button id="submit-order" class="btn-submit" disabled>Place Order</button>
+                <div class="action-buttons">
+                    <button id="save-cart" class="btn-save" style="flex: 1;">Save Cart</button>
+                    <button id="load-cart" class="btn-load" style="flex: 1;">Load Saved Cart</button>
+                </div>
+                <div class="cart-total-inline">
+                    <span>Total Cart Value:</span>
+                    <strong>₹<span id="sticky-total-amount">0.00</span></strong>
+                </div>
+                <button id="submit-order" class="btn-submit" disabled>Place Order</button>
             </div>
         </div>
         
@@ -828,6 +852,7 @@
             const orderTotal = document.getElementById('order-total');
             const totalAmount = document.getElementById('total-amount');
             const submitBtn = document.getElementById('submit-order');
+            const stickyTotal = document.getElementById('sticky-total-amount');
             
             const items = Object.keys(cart).map(productId => {
                 const product = products.find(p => p.id == productId);
@@ -840,6 +865,12 @@
                 orderItems.innerHTML = '<div class="empty-cart">Your cart is empty</div>';
                 orderTotal.style.display = 'none';
                 submitBtn.disabled = true;
+                if (totalAmount) {
+                    totalAmount.textContent = '0.00';
+                }
+                if (stickyTotal) {
+                    stickyTotal.textContent = '0.00';
+                }
                 return;
             }
             
@@ -856,6 +887,9 @@
             `).join('');
             
             totalAmount.textContent = total.toFixed(2);
+            if (stickyTotal) {
+                stickyTotal.textContent = total.toFixed(2);
+            }
             orderTotal.style.display = 'block';
             submitBtn.disabled = false;
         }

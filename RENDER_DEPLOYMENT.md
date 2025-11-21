@@ -67,12 +67,12 @@ This guide will help you deploy the Order Management System to Render.com.
    TWILIO_AUTH_TOKEN=your_auth_token_here
    TWILIO_WHATSAPP_FROM=whatsapp:+14155238886
    ADMIN_WHATSAPP_NUMBER=whatsapp:+1234567890
-   DATABASE_URL=<render-postgres-connection-string>
+    DATABASE_URL=<render-postgres-connection-string>
    # Google OAuth (Recommended - uses your personal storage)
    GOOGLE_OAUTH_CLIENT_ID=your-oauth-client-id.apps.googleusercontent.com
    GOOGLE_OAUTH_CLIENT_SECRET=GOCSPX-your-client-secret
    GOOGLE_OAUTH_REDIRECT_URI=https://your-app-name.onrender.com/oauth2callback
-   GOOGLE_DRIVE_FOLDER_ID=<optional-folder-id>
+    GOOGLE_DRIVE_FOLDER_ID=<optional-folder-id>
    ```
    > **Important**: 
    > - Replace `your-app-name` in `GOOGLE_OAUTH_REDIRECT_URI` with your actual Render app name
