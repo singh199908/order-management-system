@@ -747,7 +747,7 @@ def get_products():
         'parent_code': p.parent_code,
         'item_lot_type': p.item_lot_type,
         'quantity_available': p.quantity_available,
-        'mrp': p.mrp
+        'mrp': p.mrp if p.mrp is not None and p.mrp == p.mrp else None
     } for p in products])
 
 @app.route('/api/place_order', methods=['POST'])
@@ -931,7 +931,11 @@ def upload_stock():
                 mrp = None
                 if 'mrp' in column_mapping:
                     try:
-                        mrp = float(row[column_mapping['mrp']])
+                        val = row[column_mapping['mrp']]
+                        if pd.isna(val):
+                            mrp = None
+                        else:
+                            mrp = float(val)
                     except:
                         mrp = None
                 
