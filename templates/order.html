@@ -757,20 +757,36 @@
     </div>
     
     <script>
-        let products = [];
-        let filteredProducts = [];
+        const productsEndpoint = "{{ url_for('get_products') }}";
+        const initialProducts = {{ products|tojson|safe }};
+        let products = Array.isArray(initialProducts) ? initialProducts : [];
+        let filteredProducts = [...products];
         let cart = {};
         
-        // Load products
-        async function loadProducts() {
+        // Load products (and refresh quantities after actions)
+        async function loadProducts(showAlerts = true) {
             try {
-                const response = await fetch('/api/products');
-                products = await response.json();
-                filteredProducts = products;
+                const response = await fetch(productsEndpoint, {
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (!response.ok) {
+                    throw new Error(`Request failed with status ${response.status}`);
+                }
+                const data = await response.json();
+                if (!Array.isArray(data)) {
+                    throw new Error('Invalid response payload');
+                }
+                products = data;
+                filteredProducts = [...products];
                 renderProducts();
             } catch (error) {
-                document.getElementById('products-container').innerHTML = 
-                    '<div class="alert alert-error">Error loading products. Please refresh the page.</div>';
+                console.error('Error loading products:', error);
+                if (!products.length) {
+                    document.getElementById('products-container').innerHTML = 
+                        '<div class="alert alert-error">Error loading products. Please refresh the page.</div>';
+                } else if (showAlerts) {
+                    showAlert('Could not refresh products. Showing the last known stock.', 'error');
+                }
             }
         }
         
@@ -778,7 +794,7 @@
             const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
             
             if (!searchTerm) {
-                filteredProducts = products;
+                filteredProducts = [...products];
             } else {
                 filteredProducts = products.filter(product => {
                     const itemType = (product.item_lot_type || '').toLowerCase();
@@ -800,7 +816,10 @@
             const container = document.getElementById('products-container');
             
             if (filteredProducts.length === 0) {
-                container.innerHTML = '<div class="alert alert-error">No products found matching your search</div>';
+                const message = products.length === 0
+                    ? 'No products available. Please contact an admin.'
+                    : 'No products found matching your search';
+                container.innerHTML = `<div class="alert alert-error">${message}</div>`;
                 return;
             }
             
@@ -934,7 +953,7 @@
                     showAlert(data.message || 'Order placed successfully!', 'success');
                     cart = {};
                     renderOrderSummary();
-                    await loadProducts(); // Refresh products to update quantities
+                    await loadProducts(false); // Refresh products to update quantities
                 } else {
                     showAlert(data.error || 'Error placing order', 'error');
                 }
@@ -1008,8 +1027,15 @@
         document.getElementById('save-cart').addEventListener('click', saveCart);
         document.getElementById('load-cart').addEventListener('click', loadSavedCart);
         
-        // Initialize
-        loadProducts();
+        if (products.length) {
+            renderProducts();
+        } else {
+            document.getElementById('products-container').innerHTML = 
+                '<div class="alert alert-error">No products available. Please contact an admin.</div>';
+        }
+        
+        // Fetch latest stock in the background
+        loadProducts(false);
     </script>
 </body>
 </html>

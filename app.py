@@ -638,7 +638,15 @@ def order_page():
         return redirect(url_for('login'))
     
     products = Product.query.all()
-    return render_template('order.html', products=products)
+    product_data = [{
+        'id': product.id,
+        'lot_type_code': product.lot_type_code,
+        'parent_code': product.parent_code,
+        'item_lot_type': product.item_lot_type,
+        'quantity_available': product.quantity_available,
+        'mrp': product.mrp
+    } for product in products]
+    return render_template('order.html', products=product_data)
 
 @app.route('/my_orders')
 def my_orders():
