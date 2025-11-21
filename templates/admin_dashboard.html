@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,28 +11,28 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f5f5f5;
             padding: 20px;
         }
-        
+
         .header {
             background: white;
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        
+
         h1 {
             color: #333;
         }
-        
+
         .header-left {
             display: flex;
             gap: 20px;
@@ -43,7 +44,7 @@
             gap: 20px;
             align-items: center;
         }
-        
+
         .btn {
             padding: 10px 20px;
             border: none;
@@ -54,21 +55,21 @@
             display: inline-block;
             transition: all 0.3s;
         }
-        
+
         .btn-logout {
             background: #dc3545;
             color: white;
         }
-        
+
         .btn-logout:hover {
             background: #c82333;
         }
-        
+
         .container {
             max-width: 1400px;
             margin: 0 auto;
         }
-        
+
         .tabs {
             display: flex;
             gap: 10px;
@@ -76,9 +77,9 @@
             background: white;
             padding: 10px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        
+
         .tab {
             padding: 10px 20px;
             background: #e0e0e0;
@@ -88,38 +89,38 @@
             font-size: 14px;
             transition: all 0.3s;
         }
-        
+
         .tab.active {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
-        
+
         .tab-content {
             display: none;
         }
-        
+
         .tab-content.active {
             display: block;
         }
-        
+
         .card {
             background: white;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
         }
-        
+
         .card h2 {
             margin-bottom: 20px;
             color: #333;
         }
-        
+
         .notifications-panel {
             max-height: 400px;
             overflow-y: auto;
         }
-        
+
         .notification {
             padding: 15px;
             border-left: 4px solid #667eea;
@@ -130,22 +131,22 @@
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .notification.read {
             opacity: 0.6;
             border-left-color: #ccc;
         }
-        
+
         .notification-info {
             flex: 1;
         }
-        
+
         .notification-time {
             color: #666;
             font-size: 12px;
             margin-top: 5px;
         }
-        
+
         .btn-mark-read {
             padding: 5px 15px;
             background: #28a745;
@@ -155,56 +156,56 @@
             cursor: pointer;
             font-size: 12px;
         }
-        
+
         .orders-table {
             width: 100%;
             border-collapse: collapse;
         }
-        
+
         .orders-table th,
         .orders-table td {
             padding: 12px;
             text-align: left;
             border-bottom: 1px solid #eee;
         }
-        
+
         .orders-table th {
             background: #f8f9fa;
             font-weight: 600;
             color: #333;
         }
-        
+
         .orders-table tr:hover {
             background: #f8f9fa;
         }
-        
+
         .status-badge {
             padding: 5px 10px;
             border-radius: 12px;
             font-size: 12px;
             font-weight: 600;
         }
-        
+
         .status-pending {
             background: #fff3cd;
             color: #856404;
         }
-        
+
         .status-confirmed {
             background: #d1ecf1;
             color: #0c5460;
         }
-        
+
         .status-completed {
             background: #d4edda;
             color: #155724;
         }
-        
+
         .status-downloaded {
             background: #cce5ff;
             color: #004085;
         }
-        
+
         .btn-download {
             padding: 5px 15px;
             background: #28a745;
@@ -217,7 +218,7 @@
             display: inline-block;
             margin-right: 5px;
         }
-        
+
         .btn-sheet {
             padding: 5px 15px;
             background: #007bff;
@@ -230,15 +231,15 @@
             display: inline-block;
             margin-right: 5px;
         }
-        
+
         .btn-sheet:hover {
             background: #0069d9;
         }
-        
+
         .btn-download:hover {
             background: #218838;
         }
-        
+
         .btn-delete {
             padding: 5px 15px;
             background: #dc3545;
@@ -250,24 +251,24 @@
             text-decoration: none;
             display: inline-block;
         }
-        
+
         .btn-delete:hover {
             background: #c82333;
         }
-        
+
         .upload-section {
             padding: 20px;
             background: #f8f9fa;
             border-radius: 8px;
             margin-bottom: 20px;
         }
-        
+
         .file-input-wrapper {
             position: relative;
             display: inline-block;
             width: 100%;
         }
-        
+
         .file-input-wrapper input[type="file"] {
             width: 100%;
             padding: 10px;
@@ -276,7 +277,7 @@
             background: white;
             cursor: pointer;
         }
-        
+
         .btn-upload {
             padding: 12px 30px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -289,11 +290,11 @@
             margin-top: 15px;
             transition: transform 0.2s;
         }
-        
+
         .btn-upload:hover {
             transform: translateY(-2px);
         }
-        
+
         .btn-upload:disabled {
             background: #ccc;
             cursor: not-allowed;
@@ -325,12 +326,12 @@
             border-radius: 4px;
             padding: 8px;
         }
-        
+
         .products-table {
             width: 100%;
             border-collapse: collapse;
         }
-        
+
         .products-table th,
         .products-table td {
             padding: 10px;
@@ -338,30 +339,30 @@
             border-bottom: 1px solid #eee;
             font-size: 14px;
         }
-        
+
         .products-table th {
             background: #f8f9fa;
             font-weight: 600;
         }
-        
+
         .create-ba-section {
             padding: 20px;
             background: #f8f9fa;
             border-radius: 8px;
             margin-bottom: 20px;
         }
-        
+
         .form-group {
             margin-bottom: 15px;
         }
-        
+
         .form-group label {
             display: block;
             margin-bottom: 5px;
             color: #333;
             font-weight: 500;
         }
-        
+
         .form-group input {
             width: 100%;
             padding: 10px;
@@ -369,12 +370,12 @@
             border-radius: 5px;
             font-size: 14px;
         }
-        
+
         .form-group input:focus {
             outline: none;
             border-color: #667eea;
         }
-        
+
         .btn-create {
             padding: 10px 20px;
             background: #28a745;
@@ -385,30 +386,30 @@
             font-size: 14px;
             font-weight: 600;
         }
-        
+
         .btn-create:hover {
             background: #218838;
         }
-        
+
         .alert {
             padding: 15px;
             border-radius: 5px;
             margin-bottom: 20px;
             text-align: center;
         }
-        
+
         .alert-success {
             background-color: #d4edda;
             color: #155724;
             border: 1px solid #c3e6cb;
         }
-        
+
         .alert-error {
             background-color: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
-        
+
         .order-details {
             margin-top: 10px;
             padding: 10px;
@@ -416,62 +417,62 @@
             border-radius: 5px;
             font-size: 12px;
         }
-        
+
         .order-details-item {
             padding: 5px 0;
             border-bottom: 1px solid #ddd;
         }
-        
+
         .order-details-item:last-child {
             border-bottom: none;
         }
-        
+
         /* Mobile and Tablet Responsive Styles */
         @media (max-width: 768px) {
             body {
                 padding: 10px;
             }
-            
+
             .header {
                 flex-direction: column;
                 gap: 15px;
                 padding: 15px;
             }
-            
+
             .header-left,
             .header-right {
                 flex-direction: column;
                 width: 100%;
                 gap: 10px;
             }
-            
+
             .header-left .btn,
             .header-right .btn {
                 width: 100%;
             }
-            
+
             .tabs {
                 flex-wrap: wrap;
                 gap: 5px;
             }
-            
+
             .tab {
                 padding: 8px 15px;
                 font-size: 12px;
                 flex: 1;
                 min-width: 100px;
             }
-            
+
             .card {
                 padding: 15px;
             }
-            
+
             .orders-table {
                 display: block;
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
             }
-            
+
             .orders-table thead,
             .orders-table tbody,
             .orders-table tr,
@@ -479,11 +480,11 @@
             .orders-table th {
                 display: block;
             }
-            
+
             .orders-table thead {
                 display: none;
             }
-            
+
             .orders-table tr {
                 border: 1px solid #ddd;
                 margin-bottom: 10px;
@@ -491,7 +492,7 @@
                 background: white;
                 border-radius: 5px;
             }
-            
+
             .orders-table td {
                 border: none;
                 padding: 8px;
@@ -499,7 +500,7 @@
                 position: relative;
                 padding-left: 50%;
             }
-            
+
             .orders-table td:before {
                 content: attr(data-label);
                 position: absolute;
@@ -507,85 +508,87 @@
                 font-weight: 600;
                 text-align: left;
             }
-            
+
             .form-group {
                 margin-bottom: 15px;
             }
-            
+
             .form-group input,
             .form-group textarea {
                 width: 100%;
-                font-size: 16px; /* Prevents zoom on iOS */
+                font-size: 16px;
+                /* Prevents zoom on iOS */
             }
-            
+
             .btn-download,
             .btn-delete {
                 width: 100%;
                 margin: 5px 0;
             }
-            
+
             .notification {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 10px;
             }
-            
+
             .products-grid {
                 grid-template-columns: 1fr;
             }
         }
-        
+
         @media (max-width: 480px) {
             body {
                 padding: 5px;
             }
-            
+
             .header {
                 padding: 10px;
             }
-            
+
             .header h1 {
                 font-size: 18px;
             }
-            
+
             .tabs {
                 flex-direction: column;
             }
-            
+
             .tab {
                 width: 100%;
             }
-            
+
             .card {
                 padding: 10px;
             }
-            
+
             .card h2 {
                 font-size: 18px;
             }
-            
+
             .upload-section {
                 padding: 15px;
             }
         }
-        
+
         /* Tablet Styles */
         @media (min-width: 769px) and (max-width: 1024px) {
             .orders-table {
                 font-size: 14px;
             }
-            
+
             .orders-table th,
             .orders-table td {
                 padding: 10px 8px;
             }
-            
+
             .card {
                 padding: 15px;
             }
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
@@ -594,13 +597,14 @@
                 <span>Welcome, <strong>{{ session.username }}</strong></span>
             </div>
             <div class="header-right">
-                <a href="{{ url_for('my_orders') }}" class="btn" style="background: #6c757d; color: white;">Order History</a>
+                <a href="{{ url_for('my_orders') }}" class="btn" style="background: #6c757d; color: white;">Order
+                    History</a>
                 <a href="{{ url_for('logout') }}" class="btn btn-logout">Logout</a>
             </div>
         </div>
-        
+
         <div id="alert-container"></div>
-        
+
         <div class="tabs">
             <button class="tab active" onclick="switchTab('notifications')">Notifications</button>
             <button class="tab" onclick="switchTab('orders')">Orders</button>
@@ -609,7 +613,7 @@
             <button class="tab" onclick="switchTab('create-ba')">Create BA</button>
             <button class="tab" onclick="switchTab('whatsapp-settings')">WhatsApp Settings</button>
         </div>
-        
+
         <!-- Notifications Tab -->
         <div id="notifications" class="tab-content active">
             <div class="card">
@@ -619,7 +623,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Orders Tab -->
         <div id="orders" class="tab-content">
             <div class="card">
@@ -629,7 +633,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Products Tab -->
         <div id="products" class="tab-content">
             <div class="card">
@@ -639,7 +643,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Update Stock Tab -->
         <div id="stock" class="tab-content">
             <div class="card">
@@ -660,7 +664,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Create BA Tab -->
         <div id="create-ba" class="tab-content">
             <div class="card">
@@ -678,7 +682,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- WhatsApp Settings Tab -->
         <div id="whatsapp-settings" class="tab-content">
             <div class="card">
@@ -702,7 +706,8 @@
                     </div>
                     <div class="form-group">
                         <label for="twilio-from">Twilio WhatsApp From (e.g., whatsapp:+14155238886)</label>
-                        <input type="text" id="twilio-from" placeholder="whatsapp:+14155238886" value="whatsapp:+14155238886">
+                        <input type="text" id="twilio-from" placeholder="whatsapp:+14155238886"
+                            value="whatsapp:+14155238886">
                     </div>
                     <div class="form-group">
                         <label for="admin-whatsapp">Your WhatsApp Number (with country code)</label>
@@ -710,15 +715,17 @@
                     </div>
                     <div class="form-group">
                         <label for="content-sid">Content SID (Template ID)</label>
-                        <input type="text" id="content-sid" placeholder="HXb5b62575e6e4ff6129ad7c8efe1f983e" value="HXb5b62575e6e4ff6129ad7c8efe1f983e">
+                        <input type="text" id="content-sid" placeholder="HXb5b62575e6e4ff6129ad7c8efe1f983e"
+                            value="HXb5b62575e6e4ff6129ad7c8efe1f983e">
                     </div>
-                    <button class="btn-create" onclick="testWhatsApp()" style="background: #17a2b8; margin-right: 10px;">Test WhatsApp</button>
+                    <button class="btn-create" onclick="testWhatsApp()"
+                        style="background: #17a2b8; margin-right: 10px;">Test WhatsApp</button>
                     <button class="btn-create" onclick="saveWhatsAppSettings()">Save Settings</button>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <script>
         function switchTab(tabName) {
             // Hide all tabs
@@ -728,11 +735,11 @@
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.classList.remove('active');
             });
-            
+
             // Show selected tab
             document.getElementById(tabName).classList.add('active');
             event.target.classList.add('active');
-            
+
             // Load data for the tab
             if (tabName === 'notifications') {
                 loadNotifications();
@@ -742,19 +749,19 @@
                 loadProducts();
             }
         }
-        
+
         async function loadNotifications() {
             try {
                 const response = await fetch('/admin/notifications');
                 const notifications = await response.json();
-                
+
                 const container = document.getElementById('notifications-list');
-                
+
                 if (notifications.length === 0) {
                     container.innerHTML = '<div style="text-align: center; color: #999; padding: 40px;">No notifications</div>';
                     return;
                 }
-                
+
                 container.innerHTML = notifications.map(n => `
                     <div class="notification ${n.read ? 'read' : ''}">
                         <div class="notification-info">
@@ -765,17 +772,17 @@
                     </div>
                 `).join('');
             } catch (error) {
-                document.getElementById('notifications-list').innerHTML = 
+                document.getElementById('notifications-list').innerHTML =
                     '<div class="alert alert-error">Error loading notifications</div>';
             }
         }
-        
+
         async function markRead(notificationId) {
             try {
                 const response = await fetch(`/admin/mark_notification_read/${notificationId}`, {
                     method: 'POST'
                 });
-                
+
                 if (response.ok) {
                     loadNotifications();
                 }
@@ -783,19 +790,19 @@
                 showAlert('Error marking notification as read', 'error');
             }
         }
-        
+
         async function loadOrders() {
             try {
                 const response = await fetch('/admin/orders');
                 const orders = await response.json();
-                
+
                 const container = document.getElementById('orders-list');
-                
+
                 if (orders.length === 0) {
                     container.innerHTML = '<div style="text-align: center; color: #999; padding: 40px;">No orders yet</div>';
                     return;
                 }
-                
+
                 container.innerHTML = `
                     <table class="orders-table">
                         <thead>
@@ -845,23 +852,23 @@
                     </table>
                 `;
             } catch (error) {
-                document.getElementById('orders-list').innerHTML = 
+                document.getElementById('orders-list').innerHTML =
                     '<div class="alert alert-error">Error loading orders</div>';
             }
         }
-        
+
         async function loadProducts() {
             try {
-                const response = await fetch('/api/products');
+                const response = await fetch(`/api/products?t=${new Date().getTime()}`);
                 const products = await response.json();
-                
+
                 const container = document.getElementById('products-list');
-                
+
                 if (products.length === 0) {
                     container.innerHTML = '<div style="text-align: center; color: #999; padding: 40px;">No products</div>';
                     return;
                 }
-                
+
                 container.innerHTML = `
                     <table class="products-table">
                         <thead>
@@ -887,34 +894,34 @@
                     </table>
                 `;
             } catch (error) {
-                document.getElementById('products-list').innerHTML = 
+                document.getElementById('products-list').innerHTML =
                     '<div class="alert alert-error">Error loading products</div>';
             }
         }
-        
+
         async function uploadStock() {
             const fileInput = document.getElementById('stock-file');
             const uploadBtn = document.getElementById('upload-btn');
-            
+
             if (!fileInput.files.length) {
                 showAlert('Please select a file', 'error');
                 return;
             }
-            
+
             const formData = new FormData();
             formData.append('file', fileInput.files[0]);
-            
+
             uploadBtn.disabled = true;
             uploadBtn.textContent = 'Uploading...';
-            
+
             try {
                 const response = await fetch('/admin/upload_stock', {
                     method: 'POST',
                     body: formData
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (response.ok) {
                     showAlert(data.message, 'success');
                     fileInput.value = '';
@@ -958,16 +965,16 @@
                 deleteBtn.textContent = 'Delete Stock';
             }
         }
-        
+
         async function createBA() {
             const username = document.getElementById('ba-username').value;
             const password = document.getElementById('ba-password').value;
-            
+
             if (!username || !password) {
                 showAlert('Please enter both username and password', 'error');
                 return;
             }
-            
+
             try {
                 const response = await fetch('/admin/create_ba', {
                     method: 'POST',
@@ -976,9 +983,9 @@
                     },
                     body: JSON.stringify({ username, password })
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (response.ok) {
                     showAlert(data.message, 'success');
                     document.getElementById('ba-username').value = '';
@@ -990,7 +997,7 @@
                 showAlert('Error creating BA account. Please try again.', 'error');
             }
         }
-        
+
         function handleDownload(orderId, event) {
             // Let the link work normally, but we'll update the status after download
             // The server will update the status when the download is triggered
@@ -998,19 +1005,19 @@
                 loadOrders(); // Reload orders to show updated status
             }, 1000);
         }
-        
+
         async function deleteOrder(orderId) {
             if (!confirm(`Are you sure you want to delete Order #${orderId}? This action cannot be undone.`)) {
                 return;
             }
-            
+
             try {
                 const response = await fetch(`/admin/delete_order/${orderId}`, {
                     method: 'DELETE'
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (response.ok) {
                     showAlert(data.message || 'Order deleted successfully', 'success');
                     loadOrders(); // Reload orders list
@@ -1022,19 +1029,19 @@
                 showAlert('Error deleting order. Please try again.', 'error');
             }
         }
-        
+
         async function testWhatsApp() {
             const accountSid = document.getElementById('twilio-sid').value;
             const authToken = document.getElementById('twilio-token').value;
             const fromNumber = document.getElementById('twilio-from').value;
             const toNumber = document.getElementById('admin-whatsapp').value;
             const contentSid = document.getElementById('content-sid').value;
-            
+
             if (!accountSid || !authToken || !fromNumber || !toNumber || !contentSid) {
                 showAlert('Please fill in all fields', 'error');
                 return;
             }
-            
+
             try {
                 const response = await fetch('/admin/whatsapp/test', {
                     method: 'POST',
@@ -1049,9 +1056,9 @@
                         content_sid: contentSid
                     })
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (response.ok) {
                     showAlert(data.message, 'success');
                 } else {
@@ -1061,14 +1068,14 @@
                 showAlert('Error sending test message. Please try again.', 'error');
             }
         }
-        
+
         async function saveWhatsAppSettings() {
             const accountSid = document.getElementById('twilio-sid').value;
             const authToken = document.getElementById('twilio-token').value;
             const fromNumber = document.getElementById('twilio-from').value;
             const toNumber = document.getElementById('admin-whatsapp').value;
             const contentSid = document.getElementById('content-sid').value;
-            
+
             try {
                 const response = await fetch('/admin/whatsapp/settings', {
                     method: 'POST',
@@ -1083,9 +1090,9 @@
                         content_sid: contentSid
                     })
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (response.ok) {
                     showAlert(data.message, 'success');
                 } else {
@@ -1095,7 +1102,7 @@
                 showAlert('Error saving settings. Please try again.', 'error');
             }
         }
-        
+
         function showAlert(message, type) {
             const alertContainer = document.getElementById('alert-container');
             alertContainer.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
@@ -1103,10 +1110,10 @@
                 alertContainer.innerHTML = '';
             }, 5000);
         }
-        
+
         // Load notifications on page load
         loadNotifications();
     </script>
 </body>
-</html>
 
+</html>

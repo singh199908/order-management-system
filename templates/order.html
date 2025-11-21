@@ -766,7 +766,9 @@
         // Load products (and refresh quantities after actions)
         async function loadProducts(showAlerts = true) {
             try {
-                const response = await fetch(productsEndpoint, {
+                // Add timestamp to prevent caching
+                const url = `${productsEndpoint}?t=${new Date().getTime()}`;
+                const response = await fetch(url, {
                     headers: { 'Accept': 'application/json' }
                 });
                 if (!response.ok) {
@@ -779,6 +781,10 @@
                 products = data;
                 filteredProducts = [...products];
                 renderProducts();
+                
+                if (products.length === 0 && showAlerts) {
+                     showAlert('No products found in the system.', 'info');
+                }
             } catch (error) {
                 console.error('Error loading products:', error);
                 if (!products.length) {
