@@ -894,8 +894,9 @@
                     </table>
                 `;
             } catch (error) {
+                console.error('Error loading products:', error);
                 document.getElementById('products-list').innerHTML =
-                    '<div class="alert alert-error">Error loading products</div>';
+                    `<div class="alert alert-error">Error loading products: ${error.message}</div>`;
             }
         }
 
